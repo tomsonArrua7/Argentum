@@ -1,1091 +1,590 @@
-Attribute VB_Name = "modGeneral"
-'FénixAO 1.0
-'
-'Based on Argentum Online 0.99z
-'Copyright (C) 2002 Márquez Pablo Ignacio
-'
-'This program is free software; you can redistribute it and/or modify
-'it under the terms of the GNU General Public License as published by
-'the Free Software Foundation; either version 2 of the License, or
-'any later version.
-'
-'This program is distributed in the hope that it will be useful,
-'but WITHOUT ANY WARRANTY; without even the implied warranty of
-'MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-'GNU General Public License for more details.
-'
-'You should have received a copy of the Affero General Public License
-'along with this program; if not, write to the Free Software
-'Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-'
-'You can contact the original creator of Argentum Online at:
-'morgolock@speedy.com.ar
-'www.geocities.com/gmorgolock
-'Calle 3 número 983 piso 7 dto A
-'La Plata - Pcia, Buenos Aires - Republica Argentina
-'Código Postal 1900
-'Pablo Ignacio Márquez
-'
-'Argentum Online is based on Baronsoft's VB6 Online RPG
-'You can contact the original creator of ORE at aaron@baronsoft.com
-'for more information about ORE please visit http://www.baronsoft.com/
-'
-'You can contact me at:
-'elpresi@fenixao.com.ar
-'www.fenixao.com.ar
+Attribute VB_Name = "General"
+'================================
+'>>>>> WWW.FADICTOS.COM.AR <<<<<<
+'================================
+'Matute - matius_xd07@hotmail.com
 
+Global ANpc As Long
+Global Anpc_host As Long
 
 Option Explicit
-
-Public Audio As New clsAudio
-
-'Sound constants
-Public Const SND_CLICK = "click.Wav"
-Public Const SND_MONTANDO = "23.Wav"
-Public Const SND_PASOS1 = "23.Wav"
-Public Const SND_PASOS2 = "24.Wav"
-Public Const SND_NAVEGANDO = "50.wav"
-Public Const SND_OVER = "click2.Wav"
-Public Const SND_DICE = "cupdice.Wav"
-Public Const MIdi_Inicio = 6
-
-
-Public CartelOcultarse As Byte
-Public CartelMenosCansado As Byte
-Public CartelVestirse As Byte
-Public CartelNoHayNada As Byte
-Public CartelRecuMana As Byte
-Public CartelSanado As Byte
-Public atacar As Integer
-Public IsClan As Byte
-Public NoRes As Boolean
-Public ResOriginal As Boolean
-Public Desplazar As Boolean
-Public vigilar As Boolean
-
-
-Public RG(1 To 7, 1 To 3) As Byte
-
-Public bO As Integer
-Public bK As Long
-Public bRK As Long
-Public banners As String
-
-Public bInvMod     As Boolean
-
-Public bFogata As Boolean
-
-Public bLluvia() As Byte
-
-Type Recompensa
-    Name As String
-    Descripcion As String
-End Type
-
-Public Recompensas(1 To 60, 1 To 3, 1 To 2) As Recompensa
-Public Sub EstablecerRecompensas()
-
-Recompensas(MINERO, 1, 1).Name = "Fortaleza del Trabajador"
-Recompensas(MINERO, 1, 1).Descripcion = "Aumenta la vida en 120 puntos."
-
-Recompensas(MINERO, 1, 2).Name = "Suerte de Novato"
-Recompensas(MINERO, 1, 2).Descripcion = "Al morir hay 20% de probabilidad de no perder los minerales."
-
-Recompensas(MINERO, 2, 1).Name = "Destrucción Mágica"
-Recompensas(MINERO, 2, 1).Descripcion = "Inmunidad al paralisis lanzado por otros usuarios."
-
-Recompensas(MINERO, 2, 2).Name = "Pica Fuerte"
-Recompensas(MINERO, 2, 2).Descripcion = "Permite minar 20% más cantidad de hierro y la plata."
-
-Recompensas(MINERO, 3, 1).Name = "Gremio del Trabajador"
-Recompensas(MINERO, 3, 1).Descripcion = "Permite minar 20% más cantidad de oro."
-
-Recompensas(MINERO, 3, 2).Name = "Pico de la Suerte"
-Recompensas(MINERO, 3, 2).Descripcion = "Al morir hay 30% de probabilidad de que no perder los minerales (acumulativo con Suerte de Novato.)"
-
-
-Recompensas(HERRERO, 1, 1).Name = "Yunque Rojizo"
-Recompensas(HERRERO, 1, 1).Descripcion = "25% de probabilidad de gastar la mitad de lingotes en la creación de objetos (Solo aplicable a armas y armaduras)."
-
-Recompensas(HERRERO, 1, 2).Name = "Maestro de la Forja"
-Recompensas(HERRERO, 1, 2).Descripcion = "Reduce los costos de cascos y escudos a un 50%."
-
-Recompensas(HERRERO, 2, 1).Name = "Experto en Filos"
-Recompensas(HERRERO, 2, 1).Descripcion = "Permite crear las mejores armas (Espada Neithan, Espada Neithan + 1, Espada de Plata + 1 y Daga Infernal)."
-
-Recompensas(HERRERO, 2, 2).Name = "Experto en Corazas"
-Recompensas(HERRERO, 2, 2).Descripcion = "Permite crear las mejores armaduras (Armaduras de las Tinieblas, Armadura Legendaria y Armaduras del Dragón)."
-
-Recompensas(HERRERO, 3, 1).Name = "Fundir Metal"
-Recompensas(HERRERO, 3, 1).Descripcion = "Reduce a un 50% la cantidad de lingotes utilizados en fabricación de Armas y Armaduras (acumulable con Yunque Rojizo)."
-
-Recompensas(HERRERO, 3, 2).Name = "Trabajo en Serie"
-Recompensas(HERRERO, 3, 2).Descripcion = "10% de probabilidad de crear el doble de objetos de los asignados con la misma cantidad de lingotes."
-
-
-Recompensas(TALADOR, 1, 1).Name = "Músculos Fornidos"
-Recompensas(TALADOR, 1, 1).Descripcion = "Permite talar 20% más cantidad de madera."
-
-Recompensas(TALADOR, 1, 2).Name = "Tiempos de Calma"
-Recompensas(TALADOR, 1, 2).Descripcion = "Evita tener hambre y sed."
-
-
-Recompensas(CARPINTERO, 1, 1).Name = "Experto en Arcos"
-Recompensas(CARPINTERO, 1, 1).Descripcion = "Permite la creación de los mejores arcos (Élfico y de las Tinieblas)."
-
-Recompensas(CARPINTERO, 1, 2).Name = "Experto de Varas"
-Recompensas(CARPINTERO, 1, 2).Descripcion = "Permite la creación de las mejores varas (Engarzadas)."
-
-Recompensas(CARPINTERO, 2, 1).Name = "Fila de Leña"
-Recompensas(CARPINTERO, 2, 1).Descripcion = "Aumenta la creación de flechas a 20 por vez."
-
-Recompensas(CARPINTERO, 2, 2).Name = "Espíritu de Navegante"
-Recompensas(CARPINTERO, 2, 2).Descripcion = "Reduce en un 20% el coste de madera de las barcas."
-
-
-Recompensas(PESCADOR, 1, 1).Name = "Favor de los Dioses"
-Recompensas(PESCADOR, 1, 1).Descripcion = "Pescar 20% más cantidad de pescados."
-
-Recompensas(PESCADOR, 1, 2).Name = "Pesca en Alta Mar"
-Recompensas(PESCADOR, 1, 2).Descripcion = "Al pescar en barca hay 10% de probabilidad de obtener pescados más caros."
-
-
-Recompensas(MAGO, 1, 1).Name = "Pociones de Espíritu"
-Recompensas(MAGO, 1, 1).Descripcion = "1.000 pociones azules que no caen al morir."
-
-Recompensas(MAGO, 1, 2).Name = "Pociones de Vida"
-Recompensas(MAGO, 1, 2).Descripcion = "1.000 pociones rojas que no caen al morir."
-
-Recompensas(MAGO, 2, 1).Name = "Vitalidad"
-Recompensas(MAGO, 2, 1).Descripcion = "Aumenta la vida en 10 puntos."
-
-Recompensas(MAGO, 2, 2).Name = "Fortaleza Mental"
-Recompensas(MAGO, 2, 2).Descripcion = "Libera el limite de mana máximo."
-
-Recompensas(MAGO, 3, 1).Name = "Furia del Relámpago"
-Recompensas(MAGO, 3, 1).Descripcion = "Aumenta el daño base máximo de la Descarga Eléctrica en 10 puntos."
-
-Recompensas(MAGO, 3, 2).Name = "Destrucción"
-Recompensas(MAGO, 3, 2).Descripcion = "Aumenta el daño base mínimo del Apocalipsis en 10 puntos."
-
-
-Recompensas(NIGROMANTE, 1, 1).Name = "Pociones de Espíritu"
-Recompensas(NIGROMANTE, 1, 1).Descripcion = "1.000 pociones azules que no caen al morir."
-
-Recompensas(NIGROMANTE, 1, 2).Name = "Pociones de Vida"
-Recompensas(NIGROMANTE, 1, 2).Descripcion = "1.000 pociones rojas que no caen al morir."
-
-Recompensas(NIGROMANTE, 2, 1).Name = "Vida del Invocador"
-Recompensas(NIGROMANTE, 2, 1).Descripcion = "Aumenta la vida en 15 puntos."
-
-Recompensas(NIGROMANTE, 2, 2).Name = "Alma del Invocador"
-Recompensas(NIGROMANTE, 2, 2).Descripcion = "Aumenta el mana en 40 puntos."
-
-Recompensas(NIGROMANTE, 3, 1).Name = "Semillas de las Almas"
-Recompensas(NIGROMANTE, 3, 1).Descripcion = "Aumenta el daño base mínimo de la magia en 10 puntos."
-
-Recompensas(NIGROMANTE, 3, 2).Name = "Bloqueo de las Almas"
-Recompensas(NIGROMANTE, 3, 2).Descripcion = "Aumenta la evasión en un 5%."
-
-
-Recompensas(PALADIN, 1, 1).Name = "Pociones de Espíritu"
-Recompensas(PALADIN, 1, 1).Descripcion = "1.000 pociones azules que no caen al morir."
-
-Recompensas(PALADIN, 1, 2).Name = "Pociones de Vida"
-Recompensas(PALADIN, 1, 2).Descripcion = "1.000 pociones rojas que no caen al morir."
-
-Recompensas(PALADIN, 2, 1).Name = "Aura de Vitalidad"
-Recompensas(PALADIN, 2, 1).Descripcion = "Aumenta la vida en 5 puntos y el mana en 10 puntos."
-
-Recompensas(PALADIN, 2, 2).Name = "Aura de Espíritu"
-Recompensas(PALADIN, 2, 2).Descripcion = "Aumenta el mana en 30 puntos."
-
-Recompensas(PALADIN, 3, 1).Name = "Gracia Divina"
-Recompensas(PALADIN, 3, 1).Descripcion = "Reduce el coste de mana de Remover Paralisis a 250 puntos."
-
-Recompensas(PALADIN, 3, 2).Name = "Favor de los Enanos"
-Recompensas(PALADIN, 3, 2).Descripcion = "Aumenta en 5% la posibilidad de golpear al enemigo con armas cuerpo a cuerpo."
-
-
-Recompensas(CLERIGO, 1, 1).Name = "Pociones de Espíritu"
-Recompensas(CLERIGO, 1, 1).Descripcion = "1.000 pociones azules que no caen al morir."
-
-Recompensas(CLERIGO, 1, 2).Name = "Pociones de Vida"
-Recompensas(CLERIGO, 1, 2).Descripcion = "1.000 pociones rojas que no caen al morir."
-
-Recompensas(CLERIGO, 2, 1).Name = "Signo Vital"
-Recompensas(CLERIGO, 2, 1).Descripcion = "Aumenta la vida en 10 puntos."
-
-Recompensas(CLERIGO, 2, 2).Name = "Espíritu de Sacerdote"
-Recompensas(CLERIGO, 2, 2).Descripcion = "Aumenta el mana en 50 puntos."
-
-Recompensas(CLERIGO, 3, 1).Name = "Sacerdote Experto"
-Recompensas(CLERIGO, 3, 1).Descripcion = "Aumenta la cura base de Curar Heridas Graves en 20 puntos."
-
-Recompensas(CLERIGO, 3, 2).Name = "Alzamientos de Almas"
-Recompensas(CLERIGO, 3, 2).Descripcion = "El hechizo de Resucitar cura a las personas con su mana, energía, hambre y sed llenas y cuesta 1.100 de mana."
-
-
-Recompensas(BARDO, 1, 1).Name = "Pociones de Espíritu"
-Recompensas(BARDO, 1, 1).Descripcion = "1.000 pociones azules que no caen al morir."
-
-Recompensas(BARDO, 1, 2).Name = "Pociones de Vida"
-Recompensas(BARDO, 1, 2).Descripcion = "1.000 pociones rojas que no caen al morir."
-
-Recompensas(BARDO, 2, 1).Name = "Melodía Vital"
-Recompensas(BARDO, 2, 1).Descripcion = "Aumenta la vida en 10 puntos."
-
-Recompensas(BARDO, 2, 2).Name = "Melodía de la Meditación"
-Recompensas(BARDO, 2, 2).Descripcion = "Aumenta el mana en 50 puntos."
-
-Recompensas(BARDO, 3, 1).Name = "Concentración"
-Recompensas(BARDO, 3, 1).Descripcion = "Aumenta la probabilidad de Apuñalar a un 20% (con 100 skill)."
-
-Recompensas(BARDO, 3, 2).Name = "Melodía Caótica"
-Recompensas(BARDO, 3, 2).Descripcion = "Aumenta el daño base del Apocalipsis y la Descarga Electrica en 5 puntos."
-
-
-Recompensas(DRUIDA, 1, 1).Name = "Pociones de Espíritu"
-Recompensas(DRUIDA, 1, 1).Descripcion = "1.000 pociones azules que no caen al morir."
-
-Recompensas(DRUIDA, 1, 2).Name = "Pociones de Vida"
-Recompensas(DRUIDA, 1, 2).Descripcion = "1.000 pociones rojas que no caen al morir."
-
-Recompensas(DRUIDA, 2, 1).Name = "Grifo de la Vida"
-Recompensas(DRUIDA, 2, 1).Descripcion = "Aumenta la vida en 15 puntos."
-
-Recompensas(DRUIDA, 2, 2).Name = "Poder del Alma"
-Recompensas(DRUIDA, 2, 2).Descripcion = "Aumenta el mana en 40 puntos."
-
-Recompensas(DRUIDA, 3, 1).Name = "Raíces de la Naturaleza"
-Recompensas(DRUIDA, 3, 1).Descripcion = "Reduce el coste de mana de Inmovilizar a 250 puntos."
-
-Recompensas(DRUIDA, 3, 2).Name = "Fortaleza Natural"
-Recompensas(DRUIDA, 3, 2).Descripcion = "Aumenta la vida de los elementales invocados en 75 puntos."
-
-
-Recompensas(ASESINO, 1, 1).Name = "Pociones de Espíritu"
-Recompensas(ASESINO, 1, 1).Descripcion = "1.000 pociones azules que no caen al morir."
-
-Recompensas(ASESINO, 1, 2).Name = "Pociones de Vida"
-Recompensas(ASESINO, 1, 2).Descripcion = "1.000 pociones rojas que no caen al morir."
-
-Recompensas(ASESINO, 2, 1).Name = "Sombra de Vida"
-Recompensas(ASESINO, 2, 1).Descripcion = "Aumenta la vida en 10 puntos."
-
-Recompensas(ASESINO, 2, 2).Name = "Sombra Mágica"
-Recompensas(ASESINO, 2, 2).Descripcion = "Aumenta el mana en 30 puntos."
-
-Recompensas(ASESINO, 3, 1).Name = "Daga Mortal"
-Recompensas(ASESINO, 3, 1).Descripcion = "Aumenta el daño de Apuñalar a un 70% más que el golpe."
-
-Recompensas(ASESINO, 3, 2).Name = "Punteria mortal"
-Recompensas(ASESINO, 3, 2).Descripcion = "Las chances de apuñalar suben a 25% (Con 100 skills)."
-
-
-Recompensas(CAZADOR, 1, 1).Name = "Pociones de Espíritu"
-Recompensas(CAZADOR, 1, 1).Descripcion = "1.000 pociones azules que no caen al morir."
-
-Recompensas(CAZADOR, 1, 2).Name = "Pociones de Vida"
-Recompensas(CAZADOR, 1, 2).Descripcion = "1.000 pociones rojas que no caen al morir."
-
-Recompensas(CAZADOR, 2, 1).Name = "Fortaleza del Oso"
-Recompensas(CAZADOR, 2, 1).Descripcion = "Aumenta la vida en 10 puntos."
-
-Recompensas(CAZADOR, 2, 2).Name = "Fortaleza del Leviatán"
-Recompensas(CAZADOR, 2, 2).Descripcion = "Aumenta el mana en 50 puntos."
-
-Recompensas(CAZADOR, 3, 1).Name = "Precisión"
-Recompensas(CAZADOR, 3, 1).Descripcion = "Aumenta la puntería con arco en un 10%."
-
-Recompensas(CAZADOR, 3, 2).Name = "Tiro Preciso"
-Recompensas(CAZADOR, 3, 2).Descripcion = "Las flechas que golpeen la cabeza ignoran la defensa del casco."
-
-
-Recompensas(ARQUERO, 1, 1).Name = "Flechas Mortales"
-Recompensas(ARQUERO, 1, 1).Descripcion = "1.500 flechas que caen al morir."
-
-Recompensas(ARQUERO, 1, 2).Name = "Pociones de Vida"
-Recompensas(ARQUERO, 1, 2).Descripcion = "1.000 pociones rojas que no caen al morir."
-
-Recompensas(ARQUERO, 2, 1).Name = "Vitalidad Élfica"
-Recompensas(ARQUERO, 2, 1).Descripcion = "Aumenta la vida en 10 puntos."
-
-Recompensas(ARQUERO, 2, 2).Name = "Paso Élfico"
-Recompensas(ARQUERO, 2, 2).Descripcion = "Aumenta la evasión en un 5%."
-
-Recompensas(ARQUERO, 3, 1).Name = "Ojo del Águila"
-Recompensas(ARQUERO, 3, 1).Descripcion = "Aumenta la puntería con arco en un 5%."
-
-Recompensas(ARQUERO, 3, 2).Name = "Disparo Élfico"
-Recompensas(ARQUERO, 3, 2).Descripcion = "Aumenta el daño base mínimo de las flechas en 5 puntos y el máximo en 3 puntos."
-
-
-Recompensas(GUERRERO, 1, 1).Name = "Pociones de Poder"
-Recompensas(GUERRERO, 1, 1).Descripcion = "80 pociones verdes y 100 amarillas que no caen al morir."
-
-Recompensas(GUERRERO, 1, 2).Name = "Pociones de Vida"
-Recompensas(GUERRERO, 1, 2).Descripcion = "1.000 pociones rojas que no caen al morir."
-
-Recompensas(GUERRERO, 2, 1).Name = "Vida del Mamut"
-Recompensas(GUERRERO, 2, 1).Descripcion = "Aumenta la vida en 5 puntos."
-
-Recompensas(GUERRERO, 2, 2).Name = "Piel de Piedra"
-Recompensas(GUERRERO, 2, 2).Descripcion = "Aumenta la defensa permanentemente en 2 puntos."
-
-Recompensas(GUERRERO, 3, 1).Name = "Cuerda Tensa"
-Recompensas(GUERRERO, 3, 1).Descripcion = "Aumenta la puntería con arco en un 10%."
-
-Recompensas(GUERRERO, 3, 2).Name = "Resistencia Mágica"
-Recompensas(GUERRERO, 3, 2).Descripcion = "Reduce la duración de la parálisis de un minuto a 45 segundos."
-
-
-Recompensas(PIRATA, 1, 1).Name = "Marejada Vital"
-Recompensas(PIRATA, 1, 1).Descripcion = "Aumenta la vida en 20 puntos."
-
-Recompensas(PIRATA, 1, 2).Name = "Aventurero Arriesgado"
-Recompensas(PIRATA, 1, 2).Descripcion = "Permite entrar a los dungeons independientemente del nivel."
-
-Recompensas(PIRATA, 2, 1).Name = "Riqueza"
-Recompensas(PIRATA, 2, 1).Descripcion = "10% de probabilidad de no perder los objetos al morir."
-
-Recompensas(PIRATA, 2, 2).Name = "Escamas del Dragón"
-Recompensas(PIRATA, 2, 2).Descripcion = "Aumenta la vida en 40 puntos."
-
-Recompensas(PIRATA, 3, 1).Name = "Magia Tabú"
-Recompensas(PIRATA, 3, 1).Descripcion = "Inmunidad a la paralisis."
-
-Recompensas(PIRATA, 3, 2).Name = "Cuerda de Escape"
-Recompensas(PIRATA, 3, 2).Descripcion = "Permite salir del juego en solo dos segundos."
-
-
-Recompensas(LADRON, 1, 1).Name = "Codicia"
-Recompensas(LADRON, 1, 1).Descripcion = "Aumenta en 10% la cantidad de oro robado."
-
-Recompensas(LADRON, 1, 2).Name = "Manos Sigilosas"
-Recompensas(LADRON, 1, 2).Descripcion = "Aumenta en 5% la probabilidad de robar exitosamente."
-
-Recompensas(LADRON, 2, 1).Name = "Pies sigilosos"
-Recompensas(LADRON, 2, 1).Descripcion = "Permite moverse mientrás se está oculto."
-
-Recompensas(LADRON, 2, 2).Name = "Ladrón Experto"
-Recompensas(LADRON, 2, 2).Descripcion = "Permite el robo de objetos (10% de probabilidad)."
-
-Recompensas(LADRON, 3, 1).Name = "Robo Lejano"
-Recompensas(LADRON, 3, 1).Descripcion = "Permite robar a una distancia de hasta 4 tiles."
-
-Recompensas(LADRON, 3, 2).Name = "Fundido de Sombra"
-Recompensas(LADRON, 3, 2).Descripcion = "Aumenta en 10% la probabilidad de robar objetos."
-
-End Sub
-
-Public Function DirGraficos() As String
-DirGraficos = App.Path & "\Graficos\"
-End Function
-Public Function SD(ByVal n As Integer) As Integer
-
-Dim auxint As Integer
-Dim digit As Byte
-Dim suma As Integer
-auxint = n
-
-Do
-    digit = (auxint Mod 10)
-    suma = suma + digit
-    auxint = auxint \ 10
-
-Loop While (auxint <> 0)
-
-SD = suma
-
-End Function
-
-Public Function SDM(ByVal n As Integer) As Integer
-
-Dim auxint As Integer
-Dim digit As Integer
-Dim suma As Integer
-auxint = n
-
-Do
-    digit = (auxint Mod 10)
-    
-    digit = digit - 1
-    
-    suma = suma + digit
-    
-    auxint = auxint \ 10
-
-Loop While (auxint <> 0)
-
-SDM = suma
-
-End Function
-
-Public Function Complex(ByVal n As Integer) As Integer
-
-If n Mod 2 <> 0 Then
-    Complex = n * SD(n)
-Else
-    Complex = n * SDM(n)
-End If
-
-End Function
-
-Public Function ValidarLoginMSG(ByVal n As Integer) As Integer
-Dim AuxInteger As Integer
-Dim AuxInteger2 As Integer
-AuxInteger = SD(n)
-AuxInteger2 = SDM(n)
-ValidarLoginMSG = Complex(AuxInteger + AuxInteger2)
-End Function
-Sub AddtoRichTextBox(RichTextBox As RichTextBox, Text As String, Optional Red As Integer = -1, Optional Green As Integer, Optional Blue As Integer, Optional Bold As Boolean, Optional Italic As Boolean, Optional bCrLf As Boolean)
-
-With RichTextBox
-    If (Len(.Text)) > 4000 Then .Text = ""
-    .SelStart = Len(RichTextBox.Text)
-    .SelLength = 0
-
-    .SelBold = IIf(Bold, True, False)
-    .SelItalic = IIf(Italic, True, False)
-    
-    If Not Red = -1 Then .SelColor = RGB(Red, Green, Blue)
-
-    .SelText = IIf(bCrLf, Text, Text & vbCrLf)
-    
-    RichTextBox.Refresh
-End With
-
-End Sub
-Sub AddtoTextBox(TextBox As TextBox, Text As String)
-
-TextBox.SelStart = Len(TextBox.Text)
-TextBox.SelLength = 0
-
-TextBox.SelText = Chr(13) & Chr(10) & Text
-
-End Sub
-Function AsciiValidos(ByVal cad As String) As Boolean
-Dim car As Byte
+Public Function MapaPorUbicacion(X As Integer, Y As Integer) As Integer
 Dim i As Integer
 
-cad = LCase$(cad)
-
-For i = 1 To Len(cad)
-    car = Asc(mid$(cad, i, 1))
-    
-    If ((car < 97 Or car > 122) Or car = Asc("º")) And (car <> 255) And (car <> 32) Then
-        AsciiValidos = False
+For i = 1 To NumMaps
+    If MapInfo(i).LeftPunto = X And MapInfo(i).TopPunto = Y And MapInfo(i).Zona <> Dungeon Then
+        MapaPorUbicacion = i
         Exit Function
     End If
-    
-Next i
-
-AsciiValidos = True
-
-End Function
-
-
-
-Function CheckUserData(checkemail As Boolean) As Boolean
-
-Dim loopc As Integer
-Dim CharAscii As Integer
-
-If checkemail Then
- If UserEmail = "" Then
-    MsgBox ("Direccion de email invalida")
-    Exit Function
- End If
-End If
-
-If UserPassword = "" Then
-    MsgBox "Ingrese la contraseña de su personaje.", vbInformation, "Password"
-    Exit Function
-End If
-
-For loopc = 1 To Len(UserPassword)
-    CharAscii = Asc(mid$(UserPassword, loopc, 1))
-    If LegalCharacter(CharAscii) = False Then
-        MsgBox "El password es inválido." & vbCrLf & vbCrLf & "Volvé a intentarlo otra vez." & vbCrLf & "Si el password es ese, verifica el estado del BloqMayús.", vbExclamation, "Password inválido"
-        Exit Function
-    End If
-Next loopc
-
-If UserName = "" Then
-    MsgBox "Tenés que ingresar el Nombre de tu Personaje para poder Jugar.", vbExclamation, "Nombre inválido"
-    Exit Function
-End If
-
-If Len(UserName) > 20 Then
-    MsgBox ("El Nombre de tu Personaje debe tener menos de 20 letras.")
-    Exit Function
-End If
-
-For loopc = 1 To Len(UserName)
-
-    CharAscii = Asc(mid$(UserName, loopc, 1))
-    If LegalCharacter(CharAscii) = False Then
-        MsgBox "El Nombre del Personaje ingresado es inválido." & vbCrLf & vbCrLf & "Verifica que no halla errores en el tipeo del Nombre de tu Personaje.", vbExclamation, "Carácteres inválidos"
-        Exit Function
-    End If
-    
-Next loopc
-
-
-CheckUserData = True
-
-End Function
-Sub UnloadAllForms()
-On Error Resume Next
-Dim mifrm As Form
-
-For Each mifrm In Forms
-    Unload mifrm
 Next
 
+End Function
+Public Sub WriteBIT(Variable As Byte, POS As Byte, Value As Byte)
+
+If ReadBIT(Variable, POS) = Value Then Exit Sub
+
+If Value = 0 Then
+    Variable = Variable - 2 ^ (POS - 1)
+Else: Variable = Variable + 2 ^ (POS - 1)
+End If
+
 End Sub
+Public Function Valorcito(Variable As Byte, POS As Byte, Valor As Byte) As Byte
 
-Function LegalCharacter(KeyAscii As Integer) As Boolean
-
-If KeyAscii = 8 Then
-    LegalCharacter = True
-    Exit Function
-End If
-
-
-If KeyAscii < 32 Or KeyAscii = 44 Then
-    LegalCharacter = False
-    Exit Function
-End If
-
-If KeyAscii > 126 Then
-    LegalCharacter = False
-    Exit Function
-End If
-
-
-If KeyAscii = 34 Or KeyAscii = 42 Or KeyAscii = 47 Or KeyAscii = 58 Or KeyAscii = 60 Or KeyAscii = 62 Or KeyAscii = 63 Or KeyAscii = 92 Or KeyAscii = 124 Then
-    LegalCharacter = False
-    Exit Function
-End If
-
-
-LegalCharacter = True
+Call WriteBIT(Variable, POS, Valor)
+Valorcito = Variable
 
 End Function
-Public Function RandomNumber(ByVal LowerBound As Variant, ByVal UpperBound As Variant) As Single
+Public Function ReadBIT(Variable As Byte, POS As Byte) As Byte
+Dim i As Integer
 
-RandomNumber = Fix(Rnd * (UpperBound - LowerBound + 1)) + LowerBound
+ReadBIT = Variable
 
-End Function
-Public Function TiempoTranscurrido(ByVal Desde As Single) As Single
+For i = 7 To POS Step -1
+    ReadBIT = ReadBIT Mod 2 ^ i
+Next
 
-TiempoTranscurrido = Timer - Desde
-
-If TiempoTranscurrido < -5 Then
-    TiempoTranscurrido = TiempoTranscurrido + 86400
-ElseIf TiempoTranscurrido < 0 Then
-    TiempoTranscurrido = 0
-End If
+ReadBIT = ReadBIT \ 2 ^ (POS - 1)
 
 End Function
-Public Sub ProcesaEntradaCmd(ByVal Datos As String)
+Public Function Enemigo(ByVal Bando As Byte) As Byte
 
-If Len(Datos) = 0 Then Exit Sub
-
-Select Case left$(Datos, 1)
-    Case "\", "/"
-    
-    Case Else
-        Datos = ";" & left$(frmMain.modo, 1) & Datos
-
+Select Case Bando
+    Case Neutral
+        Enemigo = 3
+    Case Real
+        Enemigo = Caos
+    Case Caos
+        Enemigo = Real
 End Select
 
-Call SendData(Datos)
-
-End Sub
-Public Sub ResetIgnorados()
-Dim i As Integer
-
-For i = 1 To UBound(Ignorados)
-    Ignorados(i) = ""
-Next
-
-End Sub
-Public Function EstaIgnorado(CharIndex As Integer) As Boolean
-Dim i As Integer
-
-For i = 1 To UBound(Ignorados)
-    If Len(Ignorados(i)) > 0 And Ignorados(i) = CharList(CharIndex).Nombre Then
-        EstaIgnorado = True
-        Exit Function
-    End If
-Next
-
 End Function
-Sub CheckKeys()
-On Error Resume Next
+Sub DarCuerpoDesnudo(UserIndex As Integer)
 
-If Comerciando > 0 Then Exit Sub
-
-'si esta inmovilizado, dejamos moverlo para que peuda cambiar el heading, sino salimos del sub
-If UserParalizado = True And UserInmovilizado = False Then Exit Sub
-
-If GetTickCount - (LastPaso) >= 60 Then
-    LastPaso = GetTickCount
-Else
+If UserList(UserIndex).flags.Navegando Then
+    UserList(UserIndex).Char.Head = 0
+    UserList(UserIndex).Char.Body = ObjData(UserList(UserIndex).Invent.BarcoObjIndex).Ropaje
     Exit Sub
 End If
 
-If UserMoving = 0 Then
-    If Not UserEstupido Then
-        If GetKeyState(CustomKeys.BindedKey(eKeyType.mKeyUp)) < 0 Then
-            Call MoveMe(NORTH)
-            Exit Sub
-        End If
-        
-        If GetKeyState(CustomKeys.BindedKey(eKeyType.mKeyRight)) < 0 Then
-            Call MoveMe(EAST)
-            Exit Sub
-        End If
+UserList(UserIndex).Char.Head = UserList(UserIndex).OrigChar.Head
+
+Select Case UserList(UserIndex).Raza
+    Case HUMANO
+      Select Case UserList(UserIndex).Genero
+        Case HOMBRE
+             UserList(UserIndex).Char.Body = 21
+        Case MUJER
+             UserList(UserIndex).Char.Body = 39
+      End Select
+    Case ELFO_OSCURO
+      Select Case UserList(UserIndex).Genero
+        Case HOMBRE
+             UserList(UserIndex).Char.Body = 32
+        Case MUJER
+             UserList(UserIndex).Char.Body = 40
+      End Select
+    Case ENANO
+      Select Case UserList(UserIndex).Genero
+        Case HOMBRE
+             UserList(UserIndex).Char.Body = 53
+        Case MUJER
+             UserList(UserIndex).Char.Body = 60
+      End Select
+    Case GNOMO
+      Select Case UserList(UserIndex).Genero
+        Case HOMBRE
+             UserList(UserIndex).Char.Body = 53
+        Case MUJER
+             UserList(UserIndex).Char.Body = 60
+      End Select
+      
+    Case Else
+      Select Case UserList(UserIndex).Genero
+        Case HOMBRE
+             UserList(UserIndex).Char.Body = 21
+        Case MUJER
+             UserList(UserIndex).Char.Body = 39
+      End Select
     
-        If GetKeyState(CustomKeys.BindedKey(eKeyType.mKeyDown)) < 0 Then
-            Call MoveMe(SOUTH)
-            Exit Sub
-        End If
- 
-        If GetKeyState(CustomKeys.BindedKey(eKeyType.mKeyLeft)) < 0 Then
-              Call MoveMe(WEST)
-              Exit Sub
-        End If
-    Else
-        Dim kp As Boolean
-        kp = (GetKeyState(CustomKeys.BindedKey(eKeyType.mKeyUp)) < 0) Or _
-                GetKeyState(CustomKeys.BindedKey(eKeyType.mKeyRight)) < 0 Or _
-                GetKeyState(CustomKeys.BindedKey(eKeyType.mKeyDown)) < 0 Or _
-                GetKeyState(CustomKeys.BindedKey(eKeyType.mKeyLeft)) < 0
-        If kp Then Call MoveMe(Int(RandomNumber(1, 4)))
-    End If
-End If
- 
-End Sub
-Public Function ReadField(POS As Integer, Text As String, SepASCII As Integer) As String
-Dim i As Integer, LastPos As Integer, FieldNum As Integer
-
-For i = 1 To Len(Text)
-    If mid(Text, i, 1) = Chr(SepASCII) Then
-        FieldNum = FieldNum + 1
-        If FieldNum = POS Then
-            ReadField = mid(Text, LastPos + 1, (InStr(LastPos + 1, Text, Chr(SepASCII), vbTextCompare) - 1) - (LastPos))
-            Exit Function
-        End If
-        LastPos = i
-    End If
-Next
-
-If FieldNum + 1 = POS Then ReadField = mid(Text, LastPos + 1)
-
-End Function
-Public Function PonerPuntos(Numero As Long) As String
-Dim i As Integer
-Dim Cifra As String
-
-Cifra = Str(Numero)
-Cifra = Right$(Cifra, Len(Cifra) - 1)
-For i = 0 To 4
-    If Len(Cifra) - 3 * i >= 3 Then
-        If mid$(Cifra, Len(Cifra) - (2 + 3 * i), 3) <> "" Then
-            PonerPuntos = mid$(Cifra, Len(Cifra) - (2 + 3 * i), 3) & "." & PonerPuntos
-        End If
-    Else
-        If Len(Cifra) - 3 * i > 0 Then
-            PonerPuntos = left$(Cifra, Len(Cifra) - 3 * i) & "." & PonerPuntos
-        End If
-        Exit For
-    End If
-Next
-
-PonerPuntos = left$(PonerPuntos, Len(PonerPuntos) - 1)
-
-End Function
-Function FileExist(file As String, FileType As VbFileAttribute) As Boolean
-
-FileExist = Len(Dir$(file, FileType)) > 0
-
-End Function
-
-Sub WriteClientVer()
-
-Dim hFile As Integer
-    
-hFile = FreeFile()
-Open App.Path & "\init\Ver.bin" For Binary Access Write As #hFile
-Put #hFile, , CLng(777)
-Put #hFile, , CLng(777)
-Put #hFile, , CLng(777)
-
-Put #hFile, , CInt(App.Major)
-Put #hFile, , CInt(App.Minor)
-Put #hFile, , CInt(App.Revision)
-
-Close #hFile
-
-End Sub
-Function Traduccion(Original As String) As String
-Dim i As Integer, Char As Integer
-
-For i = 1 To Len(Original)
-    Char = Asc(mid$(Original, i, 1)) - 232 - i ^ 2
-    Do Until Char > 0
-        Char = Char + 255
-    Loop
-    Traduccion = Traduccion & Chr$(Char)
-Next
-    
-End Function
-Sub CargarMensajes()
-Dim i As Integer, NumMensajes As Integer, Leng As Byte
-
-Open App.Path & "\Init\Mensajes.dat" For Binary As #1
-Seek #1, 1
-
-Get #1, , NumMensajes
-
-ReDim Mensajes(1 To NumMensajes) As Mensajito
-
-For i = 1 To NumMensajes
-    Mensajes(i).Code = Space$(2)
-    Get #1, , Mensajes(i).Code
-    Mensajes(i).Code = Traduccion(Mensajes(i).Code)
-    
-    Get #1, , Leng
-    Mensajes(i).mensaje = Space$(Leng)
-    Get #1, , Mensajes(i).mensaje
-    Mensajes(i).mensaje = Traduccion(Mensajes(i).mensaje)
-    
-    Get #1, , Mensajes(i).Red
-    Get #1, , Mensajes(i).Green
-    Get #1, , Mensajes(i).Blue
-    Get #1, , Mensajes(i).Bold
-    Get #1, , Mensajes(i).Italic
-Next
-
-Close #1
-
-End Sub
-Public Sub ActualizarInformacionComercio(Index As Integer)
-
-Select Case Index
-    Case 0
-        frmComerciar.Label1(0).Caption = PonerPuntos(OtherInventory(frmComerciar.List1(0).ListIndex + 1).Valor)
-        If OtherInventory(frmComerciar.List1(0).ListIndex + 1).Amount <> 0 Then
-            frmComerciar.Label1(1).Caption = PonerPuntos(CLng(OtherInventory(frmComerciar.List1(0).ListIndex + 1).Amount))
-        ElseIf OtherInventory(frmComerciar.List1(0).ListIndex + 1).Name <> "Nada" Then
-            frmComerciar.Label1(1).Caption = "Ilimitado"
-        Else
-            frmComerciar.Label1(1).Caption = 0
-        End If
-        
-        frmComerciar.Label1(5).Caption = OtherInventory(frmComerciar.List1(0).ListIndex + 1).Name
-        frmComerciar.List1(0).ToolTipText = OtherInventory(frmComerciar.List1(0).ListIndex + 1).Name
-        
-        Select Case OtherInventory(frmComerciar.List1(0).ListIndex + 1).ObjType
-            Case 2
-                frmComerciar.Label1(3).Caption = "Max Golpe:" & OtherInventory(frmComerciar.List1(0).ListIndex + 1).MaxHit
-                frmComerciar.Label1(4).Caption = "Min Golpe:" & OtherInventory(frmComerciar.List1(0).ListIndex + 1).MinHit
-                frmComerciar.Label1(3).Visible = True
-                frmComerciar.Label1(4).Visible = True
-                frmComerciar.Label1(2).Caption = "Arma:"
-                frmComerciar.Label1(2).Visible = True
-            Case 3
-                frmComerciar.Label1(3).Visible = True
-                      frmComerciar.Label1(3).Caption = "Defensa máxima: " & OtherInventory(frmComerciar.List1(0).ListIndex + 1).MaxDef
-                frmComerciar.Label1(4).Caption = "Defensa mínima: " & OtherInventory(frmComerciar.List1(0).ListIndex + 1).MinDef
-                frmComerciar.Label1(4).Visible = True
-                frmComerciar.Label1(2).Visible = True
-                frmComerciar.Label1(2).Caption = "Casco/Escudo/Armadura"
-                If OtherInventory(frmComerciar.List1(0).ListIndex + 1).MaxDef = 0 Then
-                frmComerciar.Label1(3).Visible = False
-                frmComerciar.Label1(4).Caption = "Esta ropa no tiene defensa."
-                End If
-                If OtherInventory(frmComerciar.List1(0).ListIndex + 1).MaxDef > 0 Then
-                    frmComerciar.Label1(3).Visible = False
-                    frmComerciar.Label1(4).Caption = "Defensa: " & OtherInventory(frmComerciar.List1(0).ListIndex + 1).MinDef & "/" & OtherInventory(frmComerciar.List1(0).ListIndex + 1).MaxDef
-                End If
-            Case 11
-                frmComerciar.Label1(3).Caption = "Max Efecto:" & OtherInventory(frmComerciar.List1(0).ListIndex + 1).MaxModificador
-                frmComerciar.Label1(4).Caption = "Min Efecto:" & OtherInventory(frmComerciar.List1(0).ListIndex + 1).MinModificador
-                
-                frmComerciar.Label1(3).Visible = True
-                frmComerciar.Label1(4).Visible = True
-                frmComerciar.Label1(2).Visible = True
-                frmComerciar.Label1(2).Caption = "Min Efecto:" & OtherInventory(frmComerciar.List1(0).ListIndex + 1).TipoPocion
-                Select Case OtherInventory(frmComerciar.List1(0).ListIndex + 1).TipoPocion
-                    Case 1
-                        frmComerciar.Label1(2).Caption = "Modifica Agilidad:"
-                    Case 2
-                        frmComerciar.Label1(2).Caption = "Modifica Fuerza:"
-                    Case 3
-                        frmComerciar.Label1(2).Caption = "Repone Vida:"
-                    Case 4
-                        frmComerciar.Label1(2).Caption = "Repone Mana:"
-                    Case 5
-                        frmComerciar.Label1(2).Caption = "- Cura Envenenamiento -"
-                        frmComerciar.Label1(3).Visible = False
-                        frmComerciar.Label1(4).Visible = False
-                End Select
-            Case 24
-                frmComerciar.Label1(3).Visible = False
-                frmComerciar.Label1(4).Visible = False
-                frmComerciar.Label1(2).Visible = True
-                frmComerciar.Label1(2).Caption = "- Hechizo -"
-            Case 31
-                frmComerciar.Label1(3).Visible = True
-                frmComerciar.Label1(4).Visible = True
-                frmComerciar.Label1(2).Visible = True
-                frmComerciar.Label1(2).Caption = "- Fragata -"
-                frmComerciar.Label1(4).Caption = "Min/Max Golpe: " & OtherInventory(frmComerciar.List1(0).ListIndex + 1).MinHit & "/" & OtherInventory(frmComerciar.List1(0).ListIndex + 1).MaxHit
-                frmComerciar.Label1(3).Caption = "Defensa:" & OtherInventory(frmComerciar.List1(0).ListIndex + 1).Def
-                frmComerciar.Label1(4).Visible = True
-            Case Else
-                frmComerciar.Label1(2).Visible = False
-                frmComerciar.Label1(3).Visible = False
-                frmComerciar.Label1(4).Visible = False
-        End Select
-        
-        If OtherInventory(frmComerciar.List1(0).ListIndex + 1).PuedeUsar > 0 Then
-            frmComerciar.Label1(6).Caption = "No podés usarlo ("
-            Select Case OtherInventory(frmComerciar.List1(0).ListIndex + 1).PuedeUsar
-                Case 1
-                    frmComerciar.Label1(6).Caption = frmComerciar.Label1(6).Caption & "Genero)"
-                Case 2
-                    frmComerciar.Label1(6).Caption = frmComerciar.Label1(6).Caption & "Clase)"
-                Case 3
-                    frmComerciar.Label1(6).Caption = frmComerciar.Label1(6).Caption & "Facción)"
-                Case 4
-                    frmComerciar.Label1(6).Caption = frmComerciar.Label1(6).Caption & "Skill)"
-                Case 5
-                    frmComerciar.Label1(6).Caption = frmComerciar.Label1(6).Caption & "Raza)"
-            End Select
-        Else
-            frmComerciar.Label1(6).Caption = ""
-        End If
-        
-        If OtherInventory(frmComerciar.List1(0).ListIndex + 1).GrhIndex > 0 Then
-            Call DrawGrhtoHdc(frmComerciar.Picture1.hdc, OtherInventory(frmComerciar.List1(0).ListIndex + 1).GrhIndex)
-        Else
-            frmComerciar.Picture1.Picture = LoadPicture()
-        End If
-        
-    Case 1
-        frmComerciar.Label1(0).Caption = PonerPuntos(UserInventory(frmComerciar.List1(1).ListIndex + 1).Valor)
-        frmComerciar.Label1(1).Caption = PonerPuntos(UserInventory(frmComerciar.List1(1).ListIndex + 1).Amount)
-        frmComerciar.Label1(5).Caption = UserInventory(frmComerciar.List1(1).ListIndex + 1).Name
-
-        frmComerciar.List1(1).ToolTipText = UserInventory(frmComerciar.List1(1).ListIndex + 1).Name
-        Select Case UserInventory(frmComerciar.List1(1).ListIndex + 1).ObjType
-            Case 2
-                frmComerciar.Label1(2).Caption = "Arma:"
-                frmComerciar.Label1(3).Caption = "Max Golpe:" & UserInventory(frmComerciar.List1(1).ListIndex + 1).MaxHit
-                frmComerciar.Label1(4).Caption = "Min Golpe:" & UserInventory(frmComerciar.List1(1).ListIndex + 1).MinHit
-                frmComerciar.Label1(3).Visible = True
-                frmComerciar.Label1(2).Visible = True
-                frmComerciar.Label1(4).Visible = True
-            Case 3
-                frmComerciar.Label1(3).Visible = True
-                frmComerciar.Label1(3).Caption = "Defensa máxima: " & UserInventory(frmComerciar.List1(1).ListIndex + 1).MaxDef
-                frmComerciar.Label1(4).Caption = "Defensa mínima: " & UserInventory(frmComerciar.List1(1).ListIndex + 1).MinDef
-                frmComerciar.Label1(4).Visible = True
-                frmComerciar.Label1(2).Visible = True
-                frmComerciar.Label1(2).Caption = "Casco/Escudo/Armadura"
-                If UserInventory(frmComerciar.List1(1).ListIndex + 1).MaxDef = 0 Then
-                frmComerciar.Label1(3).Visible = False
-                frmComerciar.Label1(4).Caption = "Esta ropa no tiene defensa."
-                End If
-                If UserInventory(frmComerciar.List1(1).ListIndex + 1).MaxDef > 0 Then
-                    frmComerciar.Label1(3).Visible = False
-                    frmComerciar.Label1(4).Caption = "Defensa " & UserInventory(frmComerciar.List1(1).ListIndex + 1).MinDef & "/" & UserInventory(frmComerciar.List1(1).ListIndex + 1).MaxDef
-                End If
-            Case 11
-                frmComerciar.Label1(3).Caption = "Max Efecto:" & UserInventory(frmComerciar.List1(1).ListIndex + 1).MaxModificador
-                frmComerciar.Label1(4).Caption = "Min Efecto:" & UserInventory(frmComerciar.List1(1).ListIndex + 1).MinModificador
-                
-                frmComerciar.Label1(3).Visible = True
-                frmComerciar.Label1(4).Visible = True
-                frmComerciar.Label1(2).Visible = True
-                
-                Select Case UserInventory(frmComerciar.List1(1).ListIndex + 1).TipoPocion
-                    Case 1
-                        frmComerciar.Label1(2).Caption = "Aumenta Agilidad"
-                    Case 2
-                        frmComerciar.Label1(2).Caption = "Aumenta Fuerza"
-                    Case 3
-                        frmComerciar.Label1(2).Caption = "Repone Vida"
-                    Case 4
-                        frmComerciar.Label1(2).Caption = "Repone Mana"
-                    Case 5
-                        frmComerciar.Label1(2).Caption = "- Cura Envenenamiento -"
-                        frmComerciar.Label1(3).Visible = False
-                        frmComerciar.Label1(4).Visible = False
-                End Select
-            Case 24
-                frmComerciar.Label1(3).Visible = False
-                frmComerciar.Label1(4).Visible = False
-                frmComerciar.Label1(2).Caption = "- Hechizo -"
-                frmComerciar.Label1(2).Visible = True
-            Case 31
-                frmComerciar.Label1(3).Visible = True
-                frmComerciar.Label1(4).Visible = True
-                frmComerciar.Label1(2).Caption = "- Fragata -"
-                frmComerciar.Label1(4).Caption = "Min/Max Golpe: " & UserInventory(frmComerciar.List1(1).ListIndex + 1).MinHit & "/" & UserInventory(frmComerciar.List1(1).ListIndex + 1).MaxHit
-                frmComerciar.Label1(3).Caption = "Defensa:" & UserInventory(frmComerciar.List1(1).ListIndex + 1).Def
-                frmComerciar.Label1(4).Visible = True
-            frmComerciar.Label1(2).Visible = True
-            Case Else
-                frmComerciar.Label1(2).Visible = False
-                frmComerciar.Label1(3).Visible = False
-                frmComerciar.Label1(4).Visible = False
-        End Select
-        
-        If UserInventory(frmComerciar.List1(1).ListIndex + 1).GrhIndex > 0 Then
-            Call DrawGrhtoHdc(frmComerciar.Picture1.hdc, UserInventory(frmComerciar.List1(1).ListIndex + 1).GrhIndex)
-        Else
-            frmComerciar.Picture1.Picture = LoadPicture()
-        End If
-        
 End Select
 
-frmComerciar.Picture1.Refresh
+UserList(UserIndex).flags.Desnudo = 1
 
 End Sub
-Sub TelepPorMapa(X As Long, Y As Long)
-Dim Columna As Long, Fila As Long
+Public Function PuedeDestrabarse(UserIndex As Integer) As Boolean
+Dim i As Byte, nPos As WorldPos
 
-Columna = Fix((X - 25) / 18)
-Fila = Fix((Y - 18) / 18)
+If (UserList(UserIndex).flags.Muerto = 0) Or (Not MapInfo(UserList(UserIndex).POS.Map).Pk And UserList(UserIndex).POS.Map <> 37) Then Exit Function
 
-Call SendData("#$" & Columna & "," & Fila)
-
-End Sub
-
-Sub Main()
-'On Error Resume Next
-VOLUMEN_FX = CInt(GetVar(App.Path & "/Init/Opciones.opc", "CONFIG", "Vol_fx"))
-VOLUMEN_MUSICA = CInt(GetVar(App.Path & "/Init/Opciones.opc", "CONFIG", "Vol_music"))
-
-Audio.SoundVolume = (10 ^ ((VOLUMEN_FX + 900) / 1000 + 1))
-Audio.MusicVolume = (VOLUMEN_MUSICA)
-
-FrmIntro.Hide
-
-AddtoRichTextBox frmCargando.Status, "Cargando TrhynumAO...", 255, 150, 50, 1, , False
-
-Call WriteClientVer
-
-CartelOcultarse = Val(GetVar(App.Path & "/Init/Opciones.opc", "CARTELES", "Ocultarse"))
-CartelMenosCansado = Val(GetVar(App.Path & "/Init/Opciones.opc", "CARTELES", "MenosCansado"))
-CartelVestirse = Val(GetVar(App.Path & "/Init/Opciones.opc", "CARTELES", "Vestirse"))
-CartelNoHayNada = Val(GetVar(App.Path & "/Init/Opciones.opc", "CARTELES", "NoHayNada"))
-CartelRecuMana = Val(GetVar(App.Path & "/Init/Opciones.opc", "CARTELES", "RecuMana"))
-CartelSanado = Val(GetVar(App.Path & "/Init/Opciones.opc", "CARTELES", "Sanado"))
-NoRes = Val(GetVar(App.Path & "/Init/Opciones.opc", "CONFIG", "ModoVentana"))
-ResOriginal = NoRes
-Musica = Val(GetVar(App.Path & "/Init/Opciones.opc", "CONFIG", "Musica"))
-FX = Val(GetVar(App.Path & "/Init/Opciones.opc", "CONFIG", "FX"))
-
-If ResOriginal <> True Then Call SetResolution
-
-If App.PrevInstance Then
-    Call MsgBox("¡TrhynumAO ya esta corriendo! No es posible correr otra instancia del juego. Haga click en Aceptar para salir.", vbApplicationModal + vbInformation + vbOKOnly, "Error al ejecutar")
-    End
-End If
-
-ChDrive App.Path
-ChDir App.Path
-
-If MsgBox("¿Jugaras En Pantalla Completa?", vbQuestion + vbYesNo, "Resolución") = vbYes Then
-        Call Resolution.SetResolution
-        Else
-        NoRes = False
+For i = NORTH To WEST
+    nPos = UserList(UserIndex).POS
+    Call HeadtoPos(i, nPos)
+    If InMapBounds(nPos.X, nPos.Y) Then
+        If LegalPos(nPos.Map, nPos.X, nPos.Y, CBool(UserList(UserIndex).flags.Navegando)) Then Exit Function
     End If
-frmCargando.Show
-frmCargando.Refresh
+Next
 
-UserParalizado = False
+PuedeDestrabarse = True
 
-AddtoRichTextBox frmCargando.Status, "Iniciando constantes...", 255, 150, 50, 0, , True
+End Function
+Sub Bloquear(ByVal sndRoute As Byte, ByVal sndIndex As Integer, ByVal sndMap As Integer, Map As Integer, X As Integer, Y As Integer, B As Byte)
 
-RG(1, 1) = 255
-RG(1, 2) = 128
-RG(1, 3) = 64
+Call SendData(sndRoute, sndIndex, sndMap, "BQ" & X & "," & Y & "," & B)
 
-RG(2, 1) = 0
-RG(2, 2) = 128
-RG(2, 3) = 255
+End Sub
+Sub LimpiarMundo()
+On Error Resume Next
+Dim i As Integer
 
-RG(3, 1) = 255
-RG(3, 2) = 0
-RG(3, 3) = 0
+For i = 1 To TrashCollector.Count
+    Dim d As cGarbage
+    Set d = TrashCollector(1)
+    Call EraseObj(ToMap, 0, d.Map, 1, d.Map, d.X, d.Y)
+    Call TrashCollector.Remove(1)
+    Set d = Nothing
+Next
 
-RG(4, 1) = 0
-RG(4, 2) = 240
-RG(4, 3) = 0
+End Sub
+Public Sub ResetPJ(UserIndex As Integer)
+Call SendData(ToIndex, UserIndex, 0, "||Personaje Reseteado" & FONTTYPE_TALK)
+Dim MiInt
+MiInt = RandomNumber(1, UserList(UserIndex).Stats.UserAtributosBackUP(Constitucion) \ 3)
+UserList(UserIndex).Stats.MaxHP = 15 + MiInt
+UserList(UserIndex).Stats.MinHP = 15 + MiInt
+MiInt = RandomNumber(1, UserList(UserIndex).Stats.UserAtributosBackUP(Agilidad) \ 6)
+If MiInt = 1 Then MiInt = 2
+UserList(UserIndex).Stats.MaxSta = 20 * MiInt
+UserList(UserIndex).Stats.MinSta = 20 * MiInt
+UserList(UserIndex).Stats.MaxAGU = 100
+UserList(UserIndex).Stats.MinAGU = 100
+UserList(UserIndex).Stats.MaxHam = 100
+UserList(UserIndex).Stats.MinHam = 100
+UserList(UserIndex).Stats.MaxMAN = 0
+UserList(UserIndex).Stats.MinMAN = 0
+UserList(UserIndex).Stats.MaxHit = 2
+UserList(UserIndex).Stats.MinHit = 1
+UserList(UserIndex).Stats.Exp = 0
+UserList(UserIndex).Stats.ELU = ELUs(1)
+UserList(UserIndex).Stats.ELV = 1
+UserList(UserIndex).Faccion.Bando = 0
+UserList(UserIndex).Stats.GLD = 0
+UserList(UserIndex).Stats.UserSkills(1) = 0
+UserList(UserIndex).Stats.UserSkills(2) = 0
+UserList(UserIndex).Stats.UserSkills(3) = 0
+UserList(UserIndex).Stats.UserSkills(4) = 0
+UserList(UserIndex).Stats.UserSkills(5) = 0
+UserList(UserIndex).Stats.UserSkills(6) = 0
+UserList(UserIndex).Stats.UserSkills(7) = 0
+UserList(UserIndex).Stats.UserSkills(8) = 0
+UserList(UserIndex).Stats.UserSkills(9) = 0
+UserList(UserIndex).Stats.UserSkills(10) = 0
+UserList(UserIndex).Stats.UserSkills(11) = 0
+UserList(UserIndex).Stats.UserSkills(12) = 0
+UserList(UserIndex).Stats.UserSkills(13) = 0
+UserList(UserIndex).Stats.UserSkills(14) = 0
+UserList(UserIndex).Stats.UserSkills(15) = 0
+UserList(UserIndex).Stats.UserSkills(16) = 0
+UserList(UserIndex).Stats.UserSkills(17) = 0
+UserList(UserIndex).Stats.UserSkills(18) = 0
+UserList(UserIndex).Stats.UserSkills(19) = 0
+UserList(UserIndex).Stats.UserSkills(20) = 0
+UserList(UserIndex).Stats.UserSkills(21) = 0
+UserList(UserIndex).Stats.UserSkills(22) = 0
+UserList(UserIndex).Stats.SkillPts = 10
+UserList(UserIndex).Invent.NroItems = 4
 
-RG(5, 1) = 190
-RG(5, 2) = 190
-RG(5, 3) = 190
+UserList(UserIndex).Invent.Object(1).OBJIndex = ManzanaNewbie
+UserList(UserIndex).Invent.Object(1).Amount = 40
 
-RG(6, 1) = 255
-RG(6, 2) = 128
-RG(6, 3) = 190
- 
-RG(7, 1) = 0
-RG(7, 2) = 215
-RG(7, 3) = 215
+UserList(UserIndex).Invent.Object(2).OBJIndex = AguaNewbie
+UserList(UserIndex).Invent.Object(2).Amount = 40
 
-ReDim Ciudades(1 To NUMCIUDADES) As String
-Ciudades(1) = "Ullathorpe"
-Ciudades(2) = "Nix"
-Ciudades(3) = "Banderbill"
+UserList(UserIndex).Invent.Object(3).OBJIndex = DagaNewbie
+UserList(UserIndex).Invent.Object(3).Amount = 1
+UserList(UserIndex).Invent.Object(3).Equipped = 1
 
-ReDim CityDesc(1 To NUMCIUDADES) As String
-CityDesc(1) = "Ullathorpe está establecida en el medio de los grandes bosques de Argentum, es principalmente un pueblo de campesinos y leñadores. Su ubicación hace de Ullathorpe un punto de paso obligado para todos los aventureros ya que se encuentra cerca de los lugares más legendarios de este mundo."
-CityDesc(2) = "Nix es una gran ciudad. Edificada sobre la costa oeste del principal continente de Argentum."
-CityDesc(3) = "Banderbill se encuentra al norte de Ullathorpe y Nix, es una de las ciudades más importantes de todo el imperio."
+Select Case UserList(UserIndex).Raza
+    Case HUMANO
+        UserList(UserIndex).Invent.Object(4).OBJIndex = RopaNewbieHumano
+    Case ELFO
+        UserList(UserIndex).Invent.Object(4).OBJIndex = RopaNewbieElfo
+    Case ELFO_OSCURO
+        UserList(UserIndex).Invent.Object(4).OBJIndex = RopaNewbieElfoOscuro
+    Case Else
+        UserList(UserIndex).Invent.Object(4).OBJIndex = RopaNewbieEnano
+End Select
+
+UserList(UserIndex).Invent.Object(4).Amount = 1
+UserList(UserIndex).Invent.Object(4).Equipped = 1
+
+UserList(UserIndex).Invent.Object(5).OBJIndex = PocionRojaNewbie
+UserList(UserIndex).Invent.Object(5).Amount = 500
+
+UserList(UserIndex).Invent.Object(6).OBJIndex = PocionVerdeNewbie
+UserList(UserIndex).Invent.Object(6).Amount = 30
+
+UserList(UserIndex).Invent.ArmourEqpSlot = 4
+UserList(UserIndex).Invent.ArmourEqpObjIndex = UserList(UserIndex).Invent.Object(4).OBJIndex
+
+UserList(UserIndex).Invent.WeaponEqpObjIndex = UserList(UserIndex).Invent.Object(3).OBJIndex
+UserList(UserIndex).Invent.WeaponEqpSlot = 3
+    If MiInt = 1 Then Exit Sub
+    UserList(UserIndex).Clase = 1
+    
+    Call CloseSocket(UserIndex)
+    
+End Sub
+Sub ConfigListeningSocket(ByRef Obj As Object, ByVal Port As Integer)
+#If UsarQueSocket = 0 Then
+
+Obj.AddressFamily = AF_INET
+Obj.protocol = IPPROTO_IP
+Obj.SocketType = SOCK_STREAM
+Obj.Binary = False
+Obj.Blocking = False
+Obj.BufferSize = 1024
+Obj.LocalPort = Port
+Obj.backlog = 5
+Obj.listen
+
+#End If
+End Sub
+Sub EnviarSpawnList(UserIndex As Integer)
+Dim k As Integer, SD As String
+SD = "SPL" & UBound(SpawnList) & ","
+
+For k = 1 To UBound(SpawnList)
+    SD = SD & SpawnList(k).NpcName & ","
+Next
+
+Call SendData(ToIndex, UserIndex, 0, SD)
+End Sub
+Sub EstablecerRecompensas()
+
+Recompensas(MINERO, 1, 1).SubeHP = 120
+
+Recompensas(MAGO, 1, 1).Obj(1).OBJIndex = PocionAzulNoCae
+Recompensas(MAGO, 1, 1).Obj(1).Amount = 1000
+Recompensas(MAGO, 1, 2).Obj(1).OBJIndex = PocionRojaNoCae
+Recompensas(MAGO, 1, 2).Obj(1).Amount = 1000
+Recompensas(MAGO, 2, 1).SubeHP = 10
+
+Recompensas(NIGROMANTE, 1, 1).Obj(1).OBJIndex = PocionAzulNoCae
+Recompensas(NIGROMANTE, 1, 1).Obj(1).Amount = 1000
+Recompensas(NIGROMANTE, 1, 2).Obj(1).OBJIndex = PocionRojaNoCae
+Recompensas(NIGROMANTE, 1, 2).Obj(1).Amount = 1000
+Recompensas(NIGROMANTE, 2, 1).SubeHP = 15
+Recompensas(NIGROMANTE, 2, 2).SubeMP = 40
+
+Recompensas(PALADIN, 1, 1).Obj(1).OBJIndex = PocionAzulNoCae
+Recompensas(PALADIN, 1, 1).Obj(1).Amount = 1000
+Recompensas(PALADIN, 1, 2).Obj(1).OBJIndex = PocionRojaNoCae
+Recompensas(PALADIN, 1, 2).Obj(1).Amount = 1000
+Recompensas(PALADIN, 2, 1).SubeHP = 5
+Recompensas(PALADIN, 2, 1).SubeMP = 10
+Recompensas(PALADIN, 2, 2).SubeMP = 30
+
+Recompensas(CLERIGO, 1, 1).Obj(1).OBJIndex = PocionAzulNoCae
+Recompensas(CLERIGO, 1, 1).Obj(1).Amount = 1000
+Recompensas(CLERIGO, 1, 2).Obj(1).OBJIndex = PocionRojaNoCae
+Recompensas(CLERIGO, 1, 2).Obj(1).Amount = 1000
+Recompensas(CLERIGO, 2, 1).SubeHP = 10
+Recompensas(CLERIGO, 2, 2).SubeMP = 50
+
+Recompensas(BARDO, 1, 1).Obj(1).OBJIndex = PocionAzulNoCae
+Recompensas(BARDO, 1, 1).Obj(1).Amount = 1000
+Recompensas(BARDO, 1, 2).Obj(1).OBJIndex = PocionRojaNoCae
+Recompensas(BARDO, 1, 2).Obj(1).Amount = 1000
+Recompensas(BARDO, 2, 1).SubeHP = 10
+Recompensas(BARDO, 2, 2).SubeMP = 50
+
+Recompensas(DRUIDA, 1, 1).Obj(1).OBJIndex = PocionAzulNoCae
+Recompensas(DRUIDA, 1, 1).Obj(1).Amount = 1000
+Recompensas(DRUIDA, 1, 2).Obj(1).OBJIndex = PocionRojaNoCae
+Recompensas(DRUIDA, 1, 2).Obj(1).Amount = 1000
+Recompensas(DRUIDA, 2, 1).SubeHP = 15
+Recompensas(DRUIDA, 2, 2).SubeMP = 40
+
+Recompensas(ASESINO, 1, 1).Obj(1).OBJIndex = PocionAzulNoCae
+Recompensas(ASESINO, 1, 1).Obj(1).Amount = 1000
+Recompensas(ASESINO, 1, 2).Obj(1).OBJIndex = PocionRojaNoCae
+Recompensas(ASESINO, 1, 2).Obj(1).Amount = 1000
+Recompensas(ASESINO, 2, 1).SubeHP = 10
+Recompensas(ASESINO, 2, 2).SubeMP = 30
+
+Recompensas(CAZADOR, 1, 1).Obj(1).OBJIndex = PocionAzulNoCae
+Recompensas(CAZADOR, 1, 1).Obj(1).Amount = 1000
+Recompensas(CAZADOR, 1, 2).Obj(1).OBJIndex = PocionRojaNoCae
+Recompensas(CAZADOR, 1, 2).Obj(1).Amount = 1000
+Recompensas(CAZADOR, 2, 1).SubeHP = 10
+Recompensas(CAZADOR, 2, 2).SubeMP = 50
+
+Recompensas(ARQUERO, 1, 1).Obj(1).OBJIndex = Flecha
+Recompensas(ARQUERO, 1, 1).Obj(1).Amount = 1500
+Recompensas(ARQUERO, 1, 2).Obj(1).OBJIndex = PocionRojaNoCae
+Recompensas(ARQUERO, 1, 2).Obj(1).Amount = 1000
+Recompensas(ARQUERO, 2, 1).SubeHP = 10
+
+Recompensas(GUERRERO, 1, 1).Obj(1).OBJIndex = PocionVerdeNoCae
+Recompensas(GUERRERO, 1, 1).Obj(1).Amount = 80
+Recompensas(GUERRERO, 1, 1).Obj(2).OBJIndex = PocionAmarillaNoCae
+Recompensas(GUERRERO, 1, 1).Obj(2).Amount = 100
+Recompensas(GUERRERO, 1, 2).Obj(1).OBJIndex = PocionRojaNoCae
+Recompensas(GUERRERO, 1, 2).Obj(1).Amount = 1000
+Recompensas(GUERRERO, 2, 1).SubeHP = 5
+
+Recompensas(PIRATA, 1, 1).SubeHP = 20
+Recompensas(PIRATA, 2, 2).SubeHP = 40
+End Sub
+Sub EstablecerRestas()
+
+Resta(CIUDADANO) = 3
+AumentoHit(CIUDADANO) = 3
+Resta(TRABAJADOR) = 2.5
+AumentoHit(TRABAJADOR) = 3
+Resta(EXPERTO_MINERALES) = 2.5
+AumentoHit(EXPERTO_MINERALES) = 3
+Resta(MINERO) = 2.5
+AumentoHit(MINERO) = 2
+Resta(HERRERO) = 2.5
+AumentoHit(HERRERO) = 2
+Resta(EXPERTO_MADERA) = 2.5
+AumentoHit(EXPERTO_MADERA) = 3
+Resta(TALADOR) = 2.5
+AumentoHit(TALADOR) = 2
+Resta(CARPINTERO) = 2.5
+AumentoHit(CARPINTERO) = 2
+Resta(PESCADOR) = 2.5
+AumentoHit(PESCADOR) = 1
+Resta(SASTRE) = 2.5
+AumentoHit(SASTRE) = 2
+Resta(ALQUIMISTA) = 2.5
+AumentoHit(ALQUIMISTA) = 2
+Resta(LUCHADOR) = 3
+AumentoHit(LUCHADOR) = 3
+Resta(CON_MANA) = 3
+AumentoHit(CON_MANA) = 3
+Resta(HECHICERO) = 3
+AumentoHit(HECHICERO) = 3
+Resta(MAGO) = 3
+AumentoHit(MAGO) = 1
+Resta(NIGROMANTE) = 3
+AumentoHit(NIGROMANTE) = 1
+Resta(ORDEN_SAGRADA) = 1.5
+AumentoHit(ORDEN_SAGRADA) = 3
+Resta(PALADIN) = 0.5
+AumentoHit(PALADIN) = 3
+Resta(CLERIGO) = 1.5
+AumentoHit(CLERIGO) = 2
+Resta(NATURALISTA) = 2.5
+AumentoHit(NATURALISTA) = 3
+Resta(BARDO) = 1.5
+AumentoHit(BARDO) = 2
+Resta(DRUIDA) = 3
+AumentoHit(DRUIDA) = 2
+Resta(SIGILOSO) = 1.5
+AumentoHit(SIGILOSO) = 3
+Resta(ASESINO) = 1.5
+AumentoHit(ASESINO) = 3
+Resta(CAZADOR) = 0.5
+AumentoHit(CAZADOR) = 3
+Resta(SIN_MANA) = 2
+AumentoHit(SIN_MANA) = 2
+AumentoHit(ARQUERO) = 3
+AumentoHit(GUERRERO) = 3
+AumentoHit(CABALLERO) = 3
+AumentoHit(BANDIDO) = 2
+Resta(PIRATA) = 1.5
+AumentoHit(PIRATA) = 2
+Resta(LADRON) = 2.5
+AumentoHit(LADRON) = 2
+
+End Sub
+Sub LoadMensajes()
+
+Mensajes(Real, 1) = "||&HFF8080°¡No eres fiel al rey!°"
+Mensajes(Real, 2) = "||&HFF8080°¡¡Maldito insolente!! ¡Los seguidores de Lord Thek no tienen lugar en nuestro ejército!°"
+Mensajes(Real, 3) = "||&HFF8080°Tu Clan no responde a la Alianza del Fénix, debes retirarte de él para poder enlistarte.°"
+Mensajes(Real, 4) = "||&HFF8080°¡Ya perteneces a las tropas reales! ¡Ve a combatir criminales!°"
+Mensajes(Real, 5) = "||&HFF8080°¡Para unirte a nuestras fuerzas debes matar al menos 150 criminales, solo has matado "
+Mensajes(Real, 6) = "||&HFF8080°¡Para unirte a nuestras fuerzas debes ser al menos de nivel 25!°"
+Mensajes(Real, 7) = "||&HFF8080°¡¡Bienvenido a al Ejército Imperial!! Si demuestras fidelidad al rey y destreza en las peleas, podrás aumentar de jerarquía.°"
+Mensajes(Real, 8) = "%4"
+Mensajes(Real, 9) = "5&"
+Mensajes(Real, 10) = "8&"
+Mensajes(Real, 11) = "N0"
+Mensajes(Real, 12) = "L0"
+Mensajes(Real, 13) = "J0"
+Mensajes(Real, 14) = "K0"
+Mensajes(Real, 15) = "M0"
+Mensajes(Real, 16) = "||&HFF8080°¡No perteneces a las tropas reales!°"
+Mensajes(Real, 17) = "||&HFF8080°Tu deber es combatir criminales, cada 100 criminales que derrotes te dare una recompensa.°"
+Mensajes(Real, 18) = "||&HFF8080°¿Has decidido abandonarnos? Bien, ya nunca volveremos a aceptarte como ciudadano.°"
+Mensajes(Real, 19) = "1W"
+Mensajes(Real, 20) = "||Si ambos juraron fidelidad a la Alianza tienen que estar en clanes enemigos para poder atacarse." & FONTTYPE_FIGHT
+Mensajes(Real, 21) = "/E"
+Mensajes(Real, 22) = "||&HFF8080°¡Ya haz alcanzado la jerarquia más alta en las filas de la Alianza del Fenix!°"
+Mensajes(Real, 23) = "||&HFF8080°¡No puedes abandonar la Alianza del Fénix! Perteneces a un clan ya, debes abandonarlo primero.°"
+
+Mensajes(Caos, 1) = "||&H8080FF°¡No eres fiel a Lord Thek!°"
+Mensajes(Caos, 2) = "||&H8080FF°¡¡Maldito insolente!! ¡Los seguidores del rey no tienen lugar en nuestro ejército!°"
+Mensajes(Caos, 3) = "||&H8080FF°Tu Clan no responde al Ejército de Lord Thek, debes retirarte de él para poder enlistarte.°"
+Mensajes(Caos, 4) = "||&H8080FF°¡Ya perteneces a las tropas del mal! ¡Ve a combatir ciudadanos!°"
+Mensajes(Caos, 5) = "||&H8080FF°¡Para unirte a nuestras fuerzas debes matar al menos 150 ciudadanos, solo has matado "
+Mensajes(Caos, 6) = "||&H8080FF°¡Para unirte a nuestras fuerzas debes ser al menos de nivel 25!°"
+Mensajes(Caos, 7) = "||&H8080FF°¡Bienvenido al Ejército de Lord Thek! Si demuestras tu fidelidad y destreza en las peleas, podrás aumentar de jerarquía.°"
+Mensajes(Caos, 8) = "%5"
+Mensajes(Caos, 9) = "6&"
+Mensajes(Caos, 10) = "9&"
+Mensajes(Caos, 11) = "R0"
+Mensajes(Caos, 12) = "P0"
+Mensajes(Caos, 13) = "Ñ0"
+Mensajes(Caos, 14) = "O0"
+Mensajes(Caos, 15) = "Q0"
+Mensajes(Caos, 16) = "||&H8080FF°¡No perteneces al Ejército de Lord Thek!°"
+Mensajes(Caos, 17) = "||&H8080FF°Tu deber es combatir ciudadanos, cada 100 ciudadanos que derrotes te dare una recompensa.°"
+Mensajes(Caos, 18) = "||&H8080FF°¡Traidor! ¡Jamás podrás volver con nosotros!°"
+Mensajes(Caos, 19) = "2&"
+Mensajes(Caos, 20) = "||Si ambos son seguidores de Lord Thek tienen que estar en clanes enemigos para poder atacarse." & FONTTYPE_FIGHT
+Mensajes(Caos, 21) = "/D"
+Mensajes(Caos, 22) = "||&H8080FF°¡Ya haz alcanzado la jerarquia más alta en las filas del Ejército de Lord Thek!°"
+Mensajes(Caos, 23) = "||&H8080FF°¡No puedes abandonar el Ejército de Lord Thek! Perteneces a un clan ya, debes abandonarlo primero.°"
+
+End Sub
+Sub RevisarCarpetas()
+
+If Not FileExist(App.Path & "\Logs", vbDirectory) Then Call MkDir$(App.Path & "\Logs")
+If Not FileExist(App.Path & "\Logs\Consejeros", vbDirectory) Then Call MkDir$(App.Path & "\Logs\Consejeros")
+If Not FileExist(App.Path & "\Logs\Data", vbDirectory) Then Call MkDir$(App.Path & "\Logs\Data")
+If Not FileExist(App.Path & "\Foros", vbDirectory) Then Call MkDir$(App.Path & "\Foros")
+If Not FileExist(App.Path & "\Guilds", vbDirectory) Then Call MkDir$(App.Path & "\Guilds")
+If Not FileExist(App.Path & "\WorldBackUp", vbDirectory) Then Call MkDir$(App.Path & "\WorldBackUp")
+If FileExist(App.Path & "\Logs\NPCs.log", vbNormal) Then Call Kill(App.Path & "\Logs\NPCs.log")
+
+End Sub
+Sub Listas()
+Dim i As Integer
+
+LevelSkill(1).LevelValue = 3
+LevelSkill(2).LevelValue = 5
+LevelSkill(3).LevelValue = 7
+LevelSkill(4).LevelValue = 10
+LevelSkill(5).LevelValue = 13
+LevelSkill(6).LevelValue = 15
+LevelSkill(7).LevelValue = 17
+LevelSkill(8).LevelValue = 20
+LevelSkill(9).LevelValue = 23
+LevelSkill(10).LevelValue = 25
+LevelSkill(11).LevelValue = 27
+LevelSkill(12).LevelValue = 30
+LevelSkill(13).LevelValue = 33
+LevelSkill(14).LevelValue = 35
+LevelSkill(15).LevelValue = 37
+LevelSkill(16).LevelValue = 40
+LevelSkill(17).LevelValue = 43
+LevelSkill(18).LevelValue = 45
+LevelSkill(19).LevelValue = 47
+LevelSkill(20).LevelValue = 50
+LevelSkill(21).LevelValue = 53
+LevelSkill(22).LevelValue = 55
+LevelSkill(23).LevelValue = 57
+LevelSkill(24).LevelValue = 60
+LevelSkill(25).LevelValue = 63
+LevelSkill(26).LevelValue = 65
+LevelSkill(27).LevelValue = 67
+LevelSkill(28).LevelValue = 70
+LevelSkill(29).LevelValue = 73
+LevelSkill(30).LevelValue = 75
+LevelSkill(31).LevelValue = 77
+LevelSkill(32).LevelValue = 80
+LevelSkill(33).LevelValue = 83
+LevelSkill(34).LevelValue = 85
+LevelSkill(35).LevelValue = 87
+LevelSkill(36).LevelValue = 90
+LevelSkill(37).LevelValue = 93
+LevelSkill(38).LevelValue = 95
+LevelSkill(39).LevelValue = 97
+LevelSkill(40).LevelValue = 100
+LevelSkill(41).LevelValue = 100
+LevelSkill(42).LevelValue = 100
+LevelSkill(43).LevelValue = 100
+LevelSkill(44).LevelValue = 100
+LevelSkill(45).LevelValue = 100
+LevelSkill(46).LevelValue = 100
+LevelSkill(47).LevelValue = 100
+LevelSkill(48).LevelValue = 100
+LevelSkill(49).LevelValue = 100
+LevelSkill(50).LevelValue = 100
+
+ELUs(1) = 300
+
+For i = 2 To 10
+    ELUs(i) = ELUs(i - 1) * 1.5
+Next
+
+For i = 11 To 24
+    ELUs(i) = ELUs(i - 1) * 1.3
+Next
+
+For i = 25 To STAT_MAXELV - 1
+    ELUs(i) = ELUs(i - 1) * 1.2
+Next
 
 ReDim ListaRazas(1 To NUMRAZAS) As String
 ListaRazas(1) = "Humano"
-ListaRazas(2) = "Elfo"
-ListaRazas(3) = "Elfo Oscuro"
-ListaRazas(4) = "Gnomo"
-ListaRazas(5) = "Enano"
+ListaRazas(2) = "Enano"
+ListaRazas(3) = "Elfo"
+ListaRazas(4) = "Elfo oscuro"
+ListaRazas(5) = "Gnomo"
+
+ReDim ListaBandos(0 To 2) As String
+ListaBandos(0) = "Neutral"
+ListaBandos(1) = "Alianza del Fenix"
+ListaBandos(2) = "Ejército de Lord Thek"
 
 ReDim ListaClases(1 To NUMCLASES) As String
-ListaClases(1) = "Mago"
-ListaClases(2) = "Clerigo"
-ListaClases(3) = "Guerrero"
-ListaClases(4) = "Asesino"
-ListaClases(5) = "Ladron"
-ListaClases(6) = "Bardo"
-ListaClases(7) = "Druida"
-ListaClases(8) = "Bandido"
-ListaClases(9) = "Paladin"
-ListaClases(10) = "Arquero"
-ListaClases(11) = "Pescador"
-ListaClases(12) = "Herrero"
-ListaClases(13) = "Leñador"
-ListaClases(14) = "Minero"
-ListaClases(15) = "Carpintero"
-ListaClases(16) = "Pirata"
+ListaClases(1) = "Ciudadano"
+ListaClases(2) = "Trabajador"
+ListaClases(3) = "Experto en minerales"
+ListaClases(4) = "Minero"
+ListaClases(8) = "Herrero"
+ListaClases(13) = "Experto en uso de madera"
+ListaClases(14) = "Leñador"
+ListaClases(18) = "Carpintero"
+ListaClases(23) = "Pescador"
+ListaClases(27) = "Sastre"
+ListaClases(31) = "Alquimista"
+ListaClases(35) = "Luchador"
+ListaClases(36) = "Con uso de mana"
+ListaClases(37) = "Hechicero"
+ListaClases(38) = "Mago"
+ListaClases(39) = "Nigromante"
+ListaClases(40) = "Orden sagrada"
+ListaClases(41) = "Paladin"
+ListaClases(42) = "Clerigo"
+ListaClases(43) = "Naturalista"
+ListaClases(44) = "Bardo"
+ListaClases(45) = "Druida"
+ListaClases(46) = "Sigiloso"
+ListaClases(47) = "Asesino"
+ListaClases(48) = "Cazador"
+ListaClases(49) = "Sin uso de mana"
+ListaClases(50) = "Arquero"
+ListaClases(51) = "Guerrero"
+ListaClases(52) = "Caballero"
+ListaClases(53) = "Bandido"
+ListaClases(55) = "Pirata"
+ListaClases(56) = "Ladron"
 
 ReDim SkillsNames(1 To NUMSKILLS) As String
+
 SkillsNames(1) = "Magia"
 SkillsNames(2) = "Robar"
 SkillsNames(3) = "Tacticas de combate"
 SkillsNames(4) = "Combate con armas"
 SkillsNames(5) = "Meditar"
-SkillsNames(6) = "Apuñalar"
+SkillsNames(6) = "Destreza con dagas"
 SkillsNames(7) = "Ocultarse"
 SkillsNames(8) = "Supervivencia"
 SkillsNames(9) = "Talar árboles"
@@ -1103,7 +602,9 @@ SkillsNames(20) = "Sastrería"
 SkillsNames(21) = "Comercio"
 SkillsNames(22) = "Resistencia Mágica"
 
+
 ReDim UserSkills(1 To NUMSKILLS) As Integer
+
 ReDim UserAtributos(1 To NUMATRIBUTOS) As Integer
 ReDim AtributosNames(1 To NUMATRIBUTOS) As String
 AtributosNames(1) = "Fuerza"
@@ -1112,151 +613,697 @@ AtributosNames(3) = "Inteligencia"
 AtributosNames(4) = "Carisma"
 AtributosNames(5) = "Constitucion"
 
-AddtoRichTextBox frmCargando.Status, "Hecho", 255, 150, 50, 1, , False
+End Sub
 
-AddtoRichTextBox frmCargando.Status, "Cargando motor de sonido....", 255, 150, 50, , , True
+Public Sub LoadGuildsNew()
+Dim NumGuilds As Integer, GuildNum As Integer
+Dim i As Integer, Num As Integer
+Dim A As Long, S As Long
+Dim NewGuild As cGuild
 
-'Inicializamos el sonido
-    Call Audio.Initialize(frmMain.hWnd, App.Path & "\Wav\", App.Path & "\Midi\")
+If Not FileExist(App.Path & "\Guilds\GuildsInfo.inf", vbNormal) Then Exit Sub
 
-AddtoRichTextBox frmCargando.Status, "Hecho", 255, 150, 50, 1, , False
+A = INICarga(App.Path & "\Guilds\GuildsInfo.inf")
+Call INIConf(A, 0, "", 0)
 
-ENDC = Chr(1)
+S = INIBuscarSeccion(A, "INIT")
+NumGuilds = INIDarClaveInt(A, S, "NroGuilds")
 
-UserMap = 1
+For GuildNum = 1 To NumGuilds
+    
+    S = INIBuscarSeccion(A, "Guild" & GuildNum)
 
-AddtoRichTextBox frmCargando.Status, "Cargando motor grafico....", 255, 150, 50, , , True
+    If S >= 0 Then
+        Set NewGuild = New cGuild
+        With NewGuild
+        .GuildName = INIDarClaveStr(A, S, "GuildName")
+        .Founder = INIDarClaveStr(A, S, "Founder")
+        .FundationDate = INIDarClaveStr(A, S, "Date")
+        .Description = INIDarClaveStr(A, S, "Desc")
+        
+        .Codex = INIDarClaveStr(A, S, "Codex")
+        
+        .Leader = INIDarClaveStr(A, S, "Leader")
+        .Gold = INIDarClaveInt(A, S, "Gold")
+        .URL = INIDarClaveStr(A, S, "URL")
+        .GuildExperience = INIDarClaveInt(A, S, "Exp")
+        .DaysSinceLastElection = INIDarClaveInt(A, S, "DaysLast")
+        .GuildNews = INIDarClaveStr(A, S, "GuildNews")
+        .Bando = INIDarClaveInt(A, S, "Bando")
+        
+        Num = INIDarClaveInt(A, S, "NumAliados")
+        
+        For i = 1 To Num
+            Call .AlliedGuilds.Add(INIDarClaveStr(A, S, "Aliado" & i))
+        Next
+        
+        Num = INIDarClaveInt(A, S, "NumEnemigos")
+        
+        For i = 1 To Num
+            Call .EnemyGuilds.Add(INIDarClaveStr(A, S, "Enemigo" & i))
+        Next
+        
+        Num = INIDarClaveInt(A, S, "NumMiembros")
+        
+        For i = 1 To Num
+            Call .Members.Add(INIDarClaveStr(A, S, "Miembro" & i))
+        Next
+        
+        Num = INIDarClaveInt(A, S, "NumSolicitudes")
+        
+        Dim sol As cSolicitud
+    
+        For i = 1 To Num
+            Set sol = New cSolicitud
+            sol.UserName = ReadField(1, INIDarClaveStr(A, S, "Solicitud" & i), 172)
+            sol.Desc = ReadField(2, INIDarClaveStr(A, S, "Solicitud" & i), 172)
+            Call .Solicitudes.Add(sol)
+        Next
+        
+        Num = INIDarClaveInt(A, S, "NumProposiciones")
+        
+        For i = 1 To Num
+            Set sol = New cSolicitud
+            sol.UserName = ReadField(1, INIDarClaveStr(A, S, "Proposicion" & i), 172)
+            sol.Desc = ReadField(2, INIDarClaveStr(A, S, "Proposicion" & i), 172)
+            Call .PeacePropositions.Add(sol)
+        Next
+        
+        Call Guilds.Add(NewGuild)
+        End With
+    End If
+Next
 
-Call InitTileEngine(frmMain.Renderer.hWnd, 32, 32, 12, 16)
+End Sub
+Sub Main()
+On Error Resume Next
 
+Call Randomize(Timer)
 
-AddtoRichTextBox frmCargando.Status, "Hecho", 255, 150, 50, 1, , False
+ChDir App.Path
+ChDrive App.Path
 
-Call AddtoRichTextBox(frmCargando.Status, "Creando animaciones extras.", 255, 150, 50, 1, , True)
+Call RevisarCarpetas
+Call LoadMotd
+
+Prision.Map = 66
+Libertad.Map = 66
+
+Prision.X = 75
+Prision.Y = 47
+Libertad.X = 75
+Libertad.Y = 65
+
+ReDim Resta(1 To NUMCLASES) As Single
+ReDim Recompensas(1 To NUMCLASES, 1 To 3, 1 To 2) As Recompensa
+ReDim AumentoHit(1 To NUMCLASES) As Byte
+Call EstablecerRestas
+
+LastBackup = Format(Now, "Short Time")
+Minutos = Format(Now, "Short Time")
+
+ReDim Npclist(1 To MAXNPCS) As Npc
+ReDim CharList(1 To MAXCHARS) As Integer
+
+IniPath = App.Path & "\"
+DatPath = App.Path & "\Dat\"
+MapPath = App.Path & "\Maps\"
+MapDatFile = MapPath & "Info.dat"
+
+Call Listas
+
+frmCargando.Show
+
+Call PlayWaveAPI(App.Path & "\wav\harp3.wav")
+
+frmMain.Caption = frmMain.Caption & " V." & App.Major & "." & App.Minor & "." & App.Revision
+ENDL = Chr$(13) & Chr$(10)
+ENDC = Chr$(1)
+IniPath = App.Path & "\"
+CharPath = App.Path & "\charfile\"
+
+MinXBorder = XMinMapSize + (XWindow \ 2)
+MaxXBorder = XMaxMapSize - (XWindow \ 2)
+MinYBorder = YMinMapSize + (YWindow \ 2)
+MaxYBorder = YMaxMapSize - (YWindow \ 2)
+DoEvents
+
+Call LoadSoportes
+Call LoadBans
+frmCargando.Label1(2).Caption = "Iniciando Arrays..."
+Call LoadGuildsNew
+Call CargarMods
+Call CargarSpawnList
+Call CargarForbidenWords
+frmCargando.Label1(2).Caption = "Cargando Server.ini"
+Call LoadSini
+Call CargaNpcsDat
+frmCargando.Label1(2).Caption = "Cargando Obj.Dat"
+Call LoadOBJData
+Call LoadTops(Nivel)
+Call LoadTops(Muertos)
+Call LoadMensajes
+frmCargando.Label1(2).Caption = "Cargando Hechizos.Dat"
+Call CargarHechizos
+Call LoadArmasHerreria
+Call LoadArmadurasHerreria
+Call LoadEscudosHerreria
+Call LoadCascosHerreria
+Call LoadObjCarpintero
+Call LoadObjSastre
+Call LoadVentas
+Call Reto_ArenasInit
+
+Call EstablecerRecompensas
+Call LoadCasino
+frmCargando.Label1(2).Caption = "Cargando Mapas"
+Call LoadMapDataNew
+If BootDelBackUp Then
+    frmCargando.Label1(2).Caption = "Cargando BackUp"
+    Call CargarBackUp
+End If
+
+Dim LoopC As Integer
+
+NpcNoIniciado.Name = "NPC SIN INICIAR"
+UserOffline.ConnID = -1
+For LoopC = 1 To MaxUsers
+    UserList(LoopC).ConnID = -1
+Next
+
+If ClientsCommandsQueue = 1 Then
+frmMain.CmdExec.Enabled = True
+Else
+frmMain.CmdExec.Enabled = False
+End If
+
+#If UsarQueSocket = 1 Then
+    Call IniciaWsApi
+    SockListen = ListenForConnect(Puerto, hWndMsg, "")
+#ElseIf UsarQueSocket = 0 Then
+    
+    frmCargando.Label1(2).Caption = "Configurando Sockets"
+    
+    frmMain.Socket2(0).AddressFamily = AF_INET
+    frmMain.Socket2(0).protocol = IPPROTO_IP
+    frmMain.Socket2(0).SocketType = SOCK_STREAM
+    frmMain.Socket2(0).Binary = False
+    frmMain.Socket2(0).Blocking = False
+    frmMain.Socket2(0).BufferSize = 2048
+    
+    Call ConfigListeningSocket(frmMain.Socket1, Puerto)
+#End If
+
+If frmMain.Visible Then frmMain.txStatus.Caption = "Escuchando conexiones entrantes ..."
+
+Call NpcCanAttack(True)
+Call NpcAITimer(True)
+Call AutoTimer(True)
 
 Unload frmCargando
 
-Call Audio.PlayMIDI(MIdi_Inicio & ".mid")
+Call LogMain("Server iniciado.")
 
-frmPres.Picture = LoadPicture(App.Path & "\Graficos\fenix.jpg")
-frmPres.WindowState = vbMaximized
-frmPres.Show
+If HideMe = 1 Then
+    Call frmMain.InitMain(1)
+Else
+    Call frmMain.InitMain(0)
+End If
 
-Do While Not finpres
-    DoEvents
-Loop
+tInicioServer = Timer
+Call InicializaEstadisticas
 
-Unload frmPres
+End Sub
+Public Sub ApagarSistema()
+On Error GoTo Terminar
+Dim ui As Integer
 
+Call WorldSave
+Call SaveGuildsNew
+For ui = 1 To LastUser
+    Call CloseSocket(ui)
+Next
+Call SaveSoportes
+Call DescargaNpcsDat
+Call NpcCanAttack(False)
+Call NpcAITimer(False)
+Call AutoTimer(False)
 
-frmConnect.Visible = True
-
-PrimeraVez = True
-prgRun = True
-Pausa = False
-
-' Empieza el bucle
-Call ShowNextFrame
-
-EngineRun = False
-frmCargando.Show
-AddtoRichTextBox frmCargando.Status, "Liberando recursos...", 0, 0, 0, 0, 0, 1
-
-If ResOriginal <> True Then Call ResetResolution
-
-Call UnloadAllForms
-Call Resolution.ResetResolution
-Call DeInitTileEngine
-
+Terminar:
 End
 
-'ManejadorErrores:
-'    End
-    
 End Sub
+Function FileExist(file As String, FileType As VbFileAttribute) As Boolean
 
-
-
-Sub WriteVar(file As String, Main As String, Var As String, value As String)
-
-
-writeprivateprofilestring Main, Var, value, file
-
-End Sub
-
-Function GetVar(file As String, Main As String, Var As String) As String
-Dim l As Integer
-Dim Char As String
-Dim sSpaces As String
-Dim szReturn As String
-
-szReturn = ""
-
-sSpaces = Space(5000)
-
-
-getprivateprofilestring Main, Var, szReturn, sSpaces, Len(sSpaces), file
-
-GetVar = RTrim(sSpaces)
-GetVar = left$(GetVar, Len(GetVar) - 1)
+FileExist = Len(Dir$(file, FileType))
 
 End Function
-Public Function CheckMailString(ByRef sString As String) As Boolean
-On Error GoTo errHnd:
-Dim lPos As Long, lX As Long
+Public Function Tilde(Data As String) As String
 
-lPos = InStr(sString, "@")
-If (lPos <> 0) Then
-    If Not InStr(lPos, sString, ".", vbBinaryCompare) > (lPos + 1) Then Exit Function
+Tilde = Replace(Replace(Replace(Replace(Replace(UCase$(Data), "Á", "A"), "É", "E"), "Í", "I"), "Ó", "O"), "Ú", "U")
 
-    For lX = 0 To Len(sString) - 1
-        If Not lX = (lPos - 1) And Not CMSValidateChar_(Asc(mid$(sString, (lX + 1), 1))) Then Exit Function
-    Next lX
+End Function
+Public Function ReadField(POS As Integer, Text As String, SepASCII As Integer) As String
+Dim i As Integer, LastPos As Integer, FieldNum As Integer
 
-    CheckMailString = True
+For i = 1 To Len(Text)
+    If Mid$(Text, i, 1) = Chr$(SepASCII) Then
+        FieldNum = FieldNum + 1
+        If FieldNum = POS Then
+            ReadField = Mid$(Text, LastPos + 1, (InStr(LastPos + 1, Text, Chr$(SepASCII), vbTextCompare) - 1) - (LastPos))
+            Exit Function
+        End If
+        LastPos = i
+    End If
+Next
+
+If FieldNum + 1 = POS Then ReadField = Mid$(Text, LastPos + 1)
+
+End Function
+Function MapaValido(Map As Integer) As Boolean
+
+MapaValido = Map >= 1 And Map <= NumMaps
+
+End Function
+Sub MostrarNumUsers()
+
+frmMain.CantUsuarios.Caption = NumNoGMs
+Call SendData(ToAll, 0, 0, "NON" & NumNoGMs)
+
+End Sub
+Public Sub LogCriticEvent(Desc As String)
+On Error GoTo errhandler
+
+Dim nfile As Integer
+nfile = FreeFile
+Open App.Path & "\logs\Eventos.log" For Append Shared As #nfile
+Print #nfile, Date & " " & Time & " " & Desc
+Close #nfile
+
+Exit Sub
+
+errhandler:
+
+End Sub
+Public Sub LogBando(Bando As Byte, Desc As String)
+On Error GoTo errhandler
+
+Dim nfile As Integer
+nfile = FreeFile
+Select Case Bando
+    Case Real
+        Open App.Path & "\logs\EjercitoReal.log" For Append Shared As #nfile
+    Case Caos
+        Open App.Path & "\logs\EjercitoCaos.log" For Append Shared As #nfile
+End Select
+Print #nfile, Desc
+Close #nfile
+
+Exit Sub
+
+errhandler:
+
+End Sub
+Public Sub LogMain(Desc As String)
+On Error GoTo errhandler
+
+Dim nfile As Integer
+nfile = FreeFile
+Open App.Path & "\Logs\Main.log" For Append Shared As #nfile
+Print #nfile, Date & " " & Time, Desc
+Close #nfile
+
+Exit Sub
+
+errhandler:
+
+End Sub
+Public Sub Logear(Archivo As String, Desc As String)
+On Error GoTo errhandler
+
+Dim nfile As Integer
+nfile = FreeFile
+Open App.Path & "\Logs\" & Archivo & ".log" For Append Shared As #nfile
+Print #nfile, Date & " " & Time, Desc
+Close #nfile
+
+Exit Sub
+
+errhandler:
+
+End Sub
+Public Sub LogErrorUrgente(Desc As String)
+On Error GoTo errhandler
+
+Dim nfile As Integer
+nfile = FreeFile
+Open App.Path & "\ErroresUrgentes.log" For Append Shared As #nfile
+Print #nfile, Date & " " & Time & " " & Desc
+Close #nfile
+
+Exit Sub
+
+errhandler:
+
+End Sub
+Public Sub LogError(Desc As String)
+On Error GoTo errhandler
+
+Dim nfile As Integer
+nfile = FreeFile
+Open App.Path & "\logs\errores.log" For Append Shared As #nfile
+Print #nfile, Date & " " & Time & " " & Desc
+Close #nfile
+
+Exit Sub
+
+errhandler:
+
+End Sub
+Public Sub LogGM(Nombre As String, Texto As String, Consejero As Boolean)
+On Error GoTo errhandler
+
+Dim nfile As Integer
+nfile = FreeFile
+
+
+
+If Consejero Then
+    Open App.Path & "\logs\consejeros\" & Nombre & ".log" For Append Shared As #nfile
+Else
+    Open App.Path & "\logs\" & Nombre & ".log" For Append Shared As #nfile
+End If
+Print #nfile, Date & " " & Time & " " & Texto
+Close #nfile
+
+Exit Sub
+
+errhandler:
+
+End Sub
+Public Sub SaveDayStats()
+On Error GoTo errhandler
+
+Dim nfile As Integer
+nfile = FreeFile
+Open App.Path & "\logs\" & Replace(Date, "/", "-") & ".log" For Append Shared As #nfile
+
+Print #nfile, "<stats>"
+Print #nfile, "<ao>"
+Print #nfile, "<dia>" & Date & "</dia>"
+Print #nfile, "<hora>" & Time & "</hora>"
+Print #nfile, "<segundos_total>" & DayStats.Segundos & "</segundos_total>"
+Print #nfile, "<max_user>" & DayStats.MaxUsuarios & "</max_user>"
+Print #nfile, "</ao>"
+Print #nfile, "</stats>"
+
+
+Close #nfile
+
+Exit Sub
+
+errhandler:
+
+End Sub
+Public Sub LogVentaCasa(ByVal Texto As String)
+On Error GoTo errhandler
+
+Dim nfile As Integer
+nfile = FreeFile
+
+Open App.Path & "\logs\propiedades.log" For Append Shared As #nfile
+Print #nfile, "----------------------------------------------------------"
+Print #nfile, Date & " " & Time & " " & Texto
+Print #nfile, "----------------------------------------------------------"
+Close #nfile
+
+Exit Sub
+
+errhandler:
+
+End Sub
+Public Sub LogHackAttemp(Texto As String)
+On Error GoTo errhandler
+
+Dim nfile As Integer
+nfile = FreeFile
+Open App.Path & "\logs\HackAttemps.log" For Append Shared As #nfile
+Print #nfile, "----------------------------------------------------------"
+Print #nfile, Date & " " & Time & " " & Texto
+Print #nfile, "----------------------------------------------------------"
+Close #nfile
+
+Exit Sub
+
+errhandler:
+
+End Sub
+Function ValidInputNP(cad As String) As Boolean
+Dim Arg As String, i As Integer
+
+For i = 1 To 33
+    Arg = ReadField(i, cad, 44)
+    If Len(Arg) = 0 Then Exit Function
+Next
+
+ValidInputNP = True
+
+End Function
+Sub Recargar()
+Dim i As Integer
+
+Call SendData(ToAll, 0, 0, "!!Recargando información, espere unos momentos.")
+
+For i = 1 To LastUser
+    Call CloseSocket(i)
+Next
+
+ReDim Npclist(1 To MAXNPCS) As Npc
+ReDim CharList(1 To MAXCHARS) As Integer
+
+Recargando = True
+
+Call CargarSpawnList
+Call LoadSini
+Call CargaNpcsDat
+Call LoadOBJData
+Call CargarHechizos
+Call LoadArmasHerreria
+Call LoadArmadurasHerreria
+Call LoadEscudosHerreria
+Call LoadCascosHerreria
+Call LoadObjCarpintero
+Call LoadObjSastre
+Call LoadMapDataNew
+If BootDelBackUp Then Call CargarBackUp
+
+For i = 1 To MaxUsers
+    UserList(i).ConnID = -1
+Next
+
+Recargando = False
+
+End Sub
+Sub Restart()
+
+On Error Resume Next
+
+If frmMain.Visible Then frmMain.txStatus.Caption = "Reiniciando."
+
+Dim LoopC As Integer
+  
+For LoopC = 1 To MaxUsers
+    Call CloseSocket(LoopC)
+Next
+  
+LastUser = 0
+NumUsers = 0
+NumNoGMs = 0
+
+ReDim Npclist(1 To MAXNPCS) As Npc
+ReDim CharList(1 To MAXCHARS) As Integer
+
+Call LoadSini
+Call LoadOBJData
+Call LoadMapDataNew
+
+Call CargarHechizos
+
+#If UsarQueSocket = 0 Then
+    frmMain.Socket1.Cleanup
+    frmMain.Socket1.Startup
+      
+    frmMain.Socket2(0).Cleanup
+    frmMain.Socket2(0).Startup
+    
+    
+    frmMain.Socket1.AddressFamily = AF_INET
+    frmMain.Socket1.protocol = IPPROTO_IP
+    frmMain.Socket1.SocketType = SOCK_STREAM
+    frmMain.Socket1.Binary = False
+    frmMain.Socket1.Blocking = False
+    frmMain.Socket1.BufferSize = 1024
+    
+    frmMain.Socket2(0).AddressFamily = AF_INET
+    frmMain.Socket2(0).protocol = IPPROTO_IP
+    frmMain.Socket2(0).SocketType = SOCK_STREAM
+    frmMain.Socket2(0).Blocking = False
+    frmMain.Socket2(0).BufferSize = 2048
+    
+    
+    frmMain.Socket1.LocalPort = val(Puerto)
+    frmMain.Socket1.listen
+#End If
+
+If frmMain.Visible Then frmMain.txStatus.Caption = "Escuchando conexiones entrantes ..."
+
+
+Call LogMain(" Servidor reiniciado.")
+
+
+
+If HideMe = 1 Then
+    Call frmMain.InitMain(1)
+Else
+    Call frmMain.InitMain(0)
+End If
+
+  
+End Sub
+Public Function Intemperie(UserIndex As Integer) As Boolean
+    
+If MapInfo(UserList(UserIndex).POS.Map).Zona <> "DUNGEON" Then
+    Intemperie = MapData(UserList(UserIndex).POS.Map, UserList(UserIndex).POS.X, UserList(UserIndex).POS.Y).trigger <> 1 And _
+                MapData(UserList(UserIndex).POS.Map, UserList(UserIndex).POS.X, UserList(UserIndex).POS.Y).trigger <> 2 And _
+                MapData(UserList(UserIndex).POS.Map, UserList(UserIndex).POS.X, UserList(UserIndex).POS.Y).trigger <> 4
 End If
     
-errHnd:
-
 End Function
-Private Function CMSValidateChar_(ByRef iAsc As Integer) As Boolean
+Sub Desmontar(UserIndex As Integer)
+Dim Posss As WorldPos
 
-CMSValidateChar_ = iAsc = 46 Or (iAsc >= 48 And iAsc <= 57) Or _
-                    (iAsc >= 65 And iAsc <= 90) Or _
-                    (iAsc >= 97 And iAsc <= 122) Or _
-                    (iAsc = 95) Or (iAsc = 45)
-                    
-End Function
-
-Sub ConvertCPtoTP(ByVal viewPortX As Integer, ByVal viewPortY As Integer, ByRef tX As Integer, ByRef tY As Integer)
-'******************************************
-'Converts where the mouse is in the main window to a tile position. MUST be called eveytime the mouse moves.
-'******************************************
-    tX = UserPos.X + viewPortX \ 32 - frmMain.Renderer.ScaleWidth \ 64
-    tY = UserPos.Y + viewPortY \ 32 - frmMain.Renderer.ScaleHeight \ 64
-    Debug.Print tX; tY
+UserList(UserIndex).flags.Montado = 0
+Call Tilelibre(UserList(UserIndex).POS, Posss)
+Call TraerCaballo(UserIndex, UserList(UserIndex).flags.CaballoMontado + 1, Posss.X, Posss.Y, Posss.Map)
+UserList(UserIndex).flags.CaballoMontado = -1
+UserList(UserIndex).Char.Head = UserList(UserIndex).OrigChar.Head
+If UserList(UserIndex).Invent.ArmourEqpObjIndex Then
+    UserList(UserIndex).Char.Body = ObjData(UserList(UserIndex).Invent.ArmourEqpObjIndex).Ropaje
+Else
+    Call DarCuerpoDesnudo(UserIndex)
+End If
+If UserList(UserIndex).Invent.EscudoEqpObjIndex Then _
+    UserList(UserIndex).Char.ShieldAnim = ObjData(UserList(UserIndex).Invent.EscudoEqpObjIndex).ShieldAnim
+If UserList(UserIndex).Invent.WeaponEqpObjIndex Then _
+    UserList(UserIndex).Char.WeaponAnim = ObjData(UserList(UserIndex).Invent.WeaponEqpObjIndex).WeaponAnim
+If UserList(UserIndex).Invent.CascoEqpObjIndex Then _
+    UserList(UserIndex).Char.CascoAnim = ObjData(UserList(UserIndex).Invent.CascoEqpObjIndex).CascoAnim
+Call ChangeUserChar(ToMap, 0, UserList(UserIndex).POS.Map, UserIndex, RopaEquitacion(UserIndex), UserList(UserIndex).Char.Head, UserList(UserIndex).Char.Heading, UserList(UserIndex).Char.WeaponAnim, UserList(UserIndex).Char.ShieldAnim, UserList(UserIndex).Char.CascoAnim)
+Call SendData(ToIndex, UserIndex, 0, "MONTA0")
 End Sub
+Function RopaEquitacion(UserIndex As Integer) As Integer
 
-Function FieldCount(ByRef Text As String, ByVal SepASCII As Byte) As Long
-'*****************************************************************
-'Gets the number of fields in a delimited string
-'Author: Juan Martín Sotuyo Dodero (Maraxus)
-'Last Modify Date: 07/29/2007
-'*****************************************************************
-    Dim Count As Long
-    Dim curPos As Long
-    Dim delimiter As String * 1
-    
-    If LenB(Text) = 0 Then Exit Function
-    
-    delimiter = Chr$(SepASCII)
-    
-    curPos = 0
-    
-    Do
-        curPos = InStr(curPos + 1, Text, delimiter)
-        Count = Count + 1
-    Loop While curPos <> 0
-    
-    FieldCount = Count
+If RazaBaja(UserIndex) Then
+    RopaEquitacion = ROPA_DE_EQUITACION_ENANO
+Else
+    RopaEquitacion = ROPA_DE_EQUITACION_NORMAL
+End If
+
+End Function
+Public Sub TraerCaballo(UserIndex As Integer, ByVal Num As Integer, Optional X As Integer, Optional Y As Integer, Optional Map As Integer)
+Dim NPCNN As Integer
+Dim Poss As WorldPos
+If Map Then
+    Poss.Map = Map
+    Poss.X = X
+    Poss.Y = Y
+Else
+    Poss = Ubicar(UserList(UserIndex).POS)
+End If
+
+NPCNN = SpawnNpc(108, Poss, False, False)
+
+UserList(UserIndex).Caballos.NpcNum(Num - 1) = NPCNN
+UserList(UserIndex).Caballos.POS(Num - 1) = Npclist(NPCNN).POS
+
+End Sub
+Public Function Ubicar(POS As WorldPos) As WorldPos
+On Error GoTo errhandler
+
+Dim NuevaPos As WorldPos
+NuevaPos.X = 0
+NuevaPos.Y = 0
+Call Tilelibre(POS, NuevaPos)
+If NuevaPos.X <> 0 And NuevaPos.Y Then
+    Ubicar = NuevaPos
+End If
+
+Exit Function
+
+errhandler:
+End Function
+Sub QuitarCaballos(UserIndex As Integer)
+Dim i As Integer
+
+For i = 0 To UserList(UserIndex).Caballos.Num - 1
+    QuitarNPC (UserList(UserIndex).Caballos.NpcNum(i))
+Next
+
+End Sub
+Public Sub CargaNpcsDat()
+Dim npcfile As String
+
+npcfile = DatPath & "NPCs.dat"
+ANpc = INICarga(npcfile)
+Call INIConf(ANpc, 0, "", 0)
+
+npcfile = DatPath & "NPCs-HOSTILES.dat"
+Anpc_host = INICarga(npcfile)
+Call INIConf(Anpc_host, 0, "", 0)
+
+End Sub
+Public Sub DescargaNpcsDat()
+
+If ANpc Then Call INIDescarga(ANpc)
+If Anpc_host Then Call INIDescarga(Anpc_host)
+
+End Sub
+Sub GuardarUsuarios()
+Dim i As Integer
+
+Call SendData(ToAll, 0, 0, "2R")
+
+For i = 1 To LastUser
+    If UserList(i).flags.UserLogged Then Call SaveUser(i, CharPath & UCase$(UserList(i).Name) & ".chr")
+Next
+
+Call SendData(ToAll, 0, 0, "3R")
+
+End Sub
+Sub InicializaEstadisticas()
+
+Call EstadisticasWeb.Inicializa(frmMain.hwnd)
+Call EstadisticasWeb.Informar(CANTIDAD_MAPAS, NumMaps)
+Call EstadisticasWeb.Informar(CANTIDAD_ONLINE, NumUsers)
+Call EstadisticasWeb.Informar(UPTIME_SERVER, (TiempoTranscurrido(tInicioServer)) / 1000)
+Call EstadisticasWeb.Informar(RECORD_USUARIOS, recordusuarios)
+
+End Sub
+Function ZonaCura(ByVal UserIndex As Integer) As Boolean
+Dim X As Integer, Y As Integer
+For Y = UserList(UserIndex).POS.Y - MinYBorder + 1 To UserList(UserIndex).POS.Y + MinYBorder - 1
+        For X = UserList(UserIndex).POS.X - MinXBorder + 1 To UserList(UserIndex).POS.X + MinXBorder - 1
+       
+            If MapData(UserList(UserIndex).POS.Map, X, Y).NpcIndex > 0 Then
+                If Npclist(MapData(UserList(UserIndex).POS.Map, X, Y).NpcIndex).NPCtype = 1 Then
+                    If Distancia(UserList(UserIndex).POS, Npclist(MapData(UserList(UserIndex).POS.Map, X, Y).NpcIndex).POS) < 10 Then
+                        ZonaCura = True
+                        Exit Function
+                    End If
+                End If
+            End If
+           
+        Next X
+Next Y
+ZonaCura = False
 End Function

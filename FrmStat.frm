@@ -1,73 +1,39 @@
 VERSION 5.00
 Object = "{6B7E6392-850A-101B-AFC0-4210102A8DA7}#1.3#0"; "COMCTL32.OCX"
-Begin VB.Form frmCargando 
+Begin VB.Form FrmStat 
    BackColor       =   &H00C0C0C0&
-   BorderStyle     =   4  'Fixed ToolWindow
-   Caption         =   "Servidor Fénix AO"
-   ClientHeight    =   3105
-   ClientLeft      =   1455
-   ClientTop       =   3345
-   ClientWidth     =   6450
+   BorderStyle     =   3  'Fixed Dialog
+   ClientHeight    =   1095
+   ClientLeft      =   45
+   ClientTop       =   45
+   ClientWidth     =   5625
+   ClipControls    =   0   'False
    ControlBox      =   0   'False
    LinkTopic       =   "Form1"
    MaxButton       =   0   'False
    MinButton       =   0   'False
-   ScaleHeight     =   261.181
-   ScaleMode       =   0  'User
-   ScaleWidth      =   430
+   ScaleHeight     =   73
+   ScaleMode       =   3  'Pixel
+   ScaleWidth      =   375
    ShowInTaskbar   =   0   'False
    StartUpPosition =   2  'CenterScreen
-   Begin ComctlLib.ProgressBar cargar 
+   Begin ComctlLib.ProgressBar ProgressBar1 
       Height          =   255
-      Left            =   120
-      TabIndex        =   3
-      Top             =   2760
-      Width           =   3855
-      _ExtentX        =   6800
+      Left            =   240
+      TabIndex        =   1
+      Top             =   600
+      Width           =   5175
+      _ExtentX        =   9128
       _ExtentY        =   450
       _Version        =   327682
       Appearance      =   1
-      Min             =   1e-4
    End
-   Begin VB.PictureBox Picture1 
-      BorderStyle     =   0  'None
-      Height          =   2775
-      Left            =   -120
-      ScaleHeight     =   2775
-      ScaleWidth      =   6735
-      TabIndex        =   0
-      Top             =   -120
-      Width           =   6735
-      Begin VB.Label Label1 
-         Alignment       =   2  'Center
-         AutoSize        =   -1  'True
-         BackStyle       =   0  'Transparent
-         Caption         =   "Cargando Servidor Fenix AO ..."
-         BeginProperty Font 
-            Name            =   "Tahoma"
-            Size            =   8.25
-            Charset         =   0
-            Weight          =   700
-            Underline       =   0   'False
-            Italic          =   0   'False
-            Strikethrough   =   0   'False
-         EndProperty
-         ForeColor       =   &H000000FF&
-         Height          =   195
-         Index           =   3
-         Left            =   2220
-         TabIndex        =   2
-         Top             =   2040
-         Width           =   2565
-      End
-   End
-   Begin VB.Label Label1 
-      Alignment       =   1  'Right Justify
+   Begin VB.Label Titu 
       AutoSize        =   -1  'True
       BackStyle       =   0  'Transparent
-      Caption         =   " aa"
+      Caption         =   "Procesando mapas..."
       BeginProperty Font 
-         Name            =   "Tahoma"
+         Name            =   "MS Sans Serif"
          Size            =   8.25
          Charset         =   0
          Weight          =   700
@@ -77,14 +43,13 @@ Begin VB.Form frmCargando
       EndProperty
       ForeColor       =   &H00000000&
       Height          =   195
-      Index           =   2
-      Left            =   6120
-      TabIndex        =   1
-      Top             =   2760
-      Width           =   255
+      Left            =   2040
+      TabIndex        =   0
+      Top             =   240
+      Width           =   1800
    End
 End
-Attribute VB_Name = "frmCargando"
+Attribute VB_Name = "FrmStat"
 Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
@@ -123,14 +88,6 @@ Attribute VB_Exposed = False
 'You can contact me at:
 'elpresi@fenixao.com.ar
 'www.fenixao.com.ar
-
-
 Private Sub Form_Load()
 
-Picture1.Picture = LoadPicture(App.Path & "\logo.jpg")
 End Sub
-
-Private Sub Frame1_DragDrop(Source As Control, X As Single, Y As Single)
-
-End Sub
-
